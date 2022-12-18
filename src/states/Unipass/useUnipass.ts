@@ -32,6 +32,9 @@ export function useUnipassId() {
         console.log("Account:", account);
         setUsername(account.username);
         setConnected(true);
+
+        const address = UpCkb.getCKBAddress(account.username);
+        console.log("CKB Address:", address);
       }
     } catch (e) {
       setUsername(void 0);
