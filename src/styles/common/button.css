@@ -1,0 +1,3 @@
+.base-button {
+  @apply cursor-pointer hover:opacity-80 active:opacity-70;
+}

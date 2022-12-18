@@ -1,0 +1,8 @@
+.scroll-area-viewport--full {
+  @apply flex flex-col flex-auto;
+
+  & > div {
+    @apply flex flex-col flex-auto;
+    display: flex !important;
+  }
+}
