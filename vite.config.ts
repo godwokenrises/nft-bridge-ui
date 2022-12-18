@@ -1,7 +1,8 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
-import postcss from "./postcss.config";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 import react from "@vitejs/plugin-react";
+import postcss from "./postcss.config";
 
 export default defineConfig({
   resolve: {
@@ -10,5 +11,8 @@ export default defineConfig({
   css: {
     postcss,
   },
-  plugins: [react()],
+  plugins: [
+    nodePolyfills(),
+    react(),
+  ],
 });

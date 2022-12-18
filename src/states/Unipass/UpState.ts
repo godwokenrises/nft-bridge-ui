@@ -23,5 +23,5 @@ UpCkb.config({
   ckbNodeUrl: "https://testnet.ckb.dev",
   ckbIndexerUrl: "https://testnet.ckb.dev/indexer",
   upSnapshotUrl: "https://d.aggregator.unipass.id/dev/snapshot/",
-  upLockCodeHash: "0xd41445a4845a09c163d174f59644877465710031582f640ba2e11437b005b812\n",
+  upLockCodeHash: "0xd41445a4845a09c163d174f59644877465710031582f640ba2e11437b005b812",
 });
