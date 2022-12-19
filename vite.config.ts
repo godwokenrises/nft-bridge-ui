@@ -6,13 +6,15 @@ import postcss from "./postcss.config";
 
 export default defineConfig({
   resolve: {
-    alias: [{ find: "@", replacement: resolve(__dirname, "src") }],
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
   },
   css: {
     postcss,
   },
   plugins: [
-    nodePolyfills(),
     react(),
+    nodePolyfills(),
   ],
 });

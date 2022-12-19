@@ -1,5 +1,5 @@
 import { Icon } from "@ricons/utils";
-import { Button, Loader } from "@mantine/core";
+import { Button, Loader, Tooltip } from "@mantine/core";
 import { AccountBalanceWalletOutlined } from "@ricons/material";
 import { ScrollAreaModal } from "@/components/Modal/ScrollAreaModal";
 import { useUnipassId } from "@/states/Unipass/useUnipass";
@@ -34,7 +34,10 @@ export function ConnectUnipassId() {
         </div>
         <div className="mt-1 text-center font-semibold text-slate-900">Connecting</div>
         <div className="mt-0.5 text-xs text-center text-slate-500">Please connect to your UniPassId</div>
-        <Button fullWidth radius="md" variant="default" className="mt-6" onClick={disconnect}>Cancel</Button>
+
+        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Please make sure you've closed the connector of UniPass</div>}>
+          <Button fullWidth radius="md" variant="default" className="mt-6" onClick={disconnect}>Cancel</Button>
+        </Tooltip>
       </ScrollAreaModal>
     </>
   );

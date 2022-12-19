@@ -7,6 +7,7 @@ import { UpState } from "./UpState";
 
 export function useUnipassId() {
   const [username, setUsername] = useAtom(UpState.username);
+  const [l1Address, setL1Address] = useAtom(UpState.l1Address);
   const [connected, setConnected] = useAtom(UpState.connected);
   const [connecting, setConnecting] = useAtom(UpState.connecting);
   const [_, setConnectingId] = useAtom(UpState.connectingId);
@@ -35,6 +36,7 @@ export function useUnipassId() {
 
         const address = UpCkb.getCKBAddress(account.username);
         console.log("CKB Address:", address);
+        setL1Address(address);
       }
     } catch (e) {
       setUsername(void 0);
@@ -55,6 +57,7 @@ export function useUnipassId() {
 
   return {
     username,
+    l1Address,
     connected,
     connecting,
     connect,
