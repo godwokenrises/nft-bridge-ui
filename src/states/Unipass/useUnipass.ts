@@ -35,7 +35,7 @@ export function useUnipassId() {
         setConnected(true);
 
         const address = UpCkb.getCKBAddress(account.username);
-        console.log("CKB Address:", address);
+        console.log("L1 PW-lock Address:", address);
         setL1Address(address);
       }
     } catch (e) {

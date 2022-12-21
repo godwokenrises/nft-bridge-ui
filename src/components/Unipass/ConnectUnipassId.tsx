@@ -1,7 +1,7 @@
 import { Icon } from "@ricons/utils";
 import { Button, Loader, Tooltip } from "@mantine/core";
 import { AccountBalanceWalletOutlined } from "@ricons/material";
-import { ScrollAreaModal } from "@/components/Modal/ScrollAreaModal";
+import { ScrollAreaModal } from "@/components/Modal";
 import { useUnipassId } from "@/states/Unipass/useUnipass";
 
 export function ConnectUnipassId() {
@@ -27,8 +27,7 @@ export function ConnectUnipassId() {
       >
         Connect UniPass
       </Button>
-      <ScrollAreaModal size={300} withCloseButton={false} opened={connecting} onClose={() => {
-      }}>
+      <ScrollAreaModal size={300} withCloseButton={false} opened={connecting}>
         <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
           <Loader size="xl" color="currentColor" />
         </div>

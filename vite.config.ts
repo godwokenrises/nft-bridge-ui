@@ -17,4 +17,12 @@ export default defineConfig({
     react(),
     nodePolyfills(),
   ],
+  optimizeDeps: {
+    disabled: false,
+  },
+  build: {
+    commonjsOptions: {
+      include: []
+    },
+  },
 });

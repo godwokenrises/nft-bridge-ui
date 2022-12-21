@@ -1,10 +1,17 @@
+import UpCkb from "up-ckb-alpha-test";
+import { useState } from "react";
 import { Icon } from "@ricons/utils";
 import { Button, Tooltip, TextInput, NumberInput } from "@mantine/core";
 import { AccountBalanceWalletOutlined, LogOutOutlined } from "@ricons/material";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
 import { ConnectUnipassId } from "@/components/Unipass";
+import { CopyTextButton } from "@/components/Button";
 import { useUnipassId } from "@/states/Unipass/useUnipass";
 import { truncateCkbAddress } from "@/utils";
+import { Address, AddressType, Amount } from "@lay2/pw-core";
+import { UPCoreSimpleProvider } from "@/states/Unipass/UpCoreSimpleProvider";
+import { UpLockCodeHash } from "@/states/Unipass/UpState";
+import { showNotification } from "@mantine/notifications";
 
 export function TransferCkbPage() {
   const { connected } = useUnipassId();
@@ -23,7 +30,48 @@ export function TransferCkbPage() {
 
 export function TransferCkbRequest() {
   const { username, l1Address, disconnect } = useUnipassId();
-  const tuncatedL1Address = l1Address ? truncateCkbAddress(l1Address.toCKBAddress()) : void 0;
+  const fullL1Address = l1Address ? l1Address?.toCKBAddress() : void 0;
+  const tuncatedL1Address = fullL1Address ? truncateCkbAddress(fullL1Address) : void 0;
+
+  const [amount, setAmount] = useState<number | undefined>(void 0);
+  const [address, setAddress] = useState<string>("");
+  const [sending, setSending] = useState(false);
+
+  async function send() {
+    if (sending) return console.log("sending tx");
+    if (!username) return console.log("no userinfo");
+    if (!address) return console.log("no address");
+    if (!amount) return console.log("no amount");
+
+    setSending(true);
+
+    const toAmount = new Amount(String(amount!));
+    const toAddress = new Address(address!, AddressType.ckb);
+    const provider = new UPCoreSimpleProvider(username!, UpLockCodeHash);
+    console.log("transferring:", toAddress, toAmount);
+
+    try {
+      const txHash = await UpCkb.sendCKB(toAddress, toAmount, provider);
+      setAmount(void 0);
+      setAddress("");
+      showNotification({
+        autoClose: false,
+        color: "green",
+        title: "Transfer Completed",
+        message: `Click to view the transaction: ${txHash}`,
+        onClick: () => window.open(`https://pudge.explorer.nervos.org/transaction/${txHash}`, "_blank"),
+      });
+    } catch (e) {
+      console.error("tx failed:", e);
+      showNotification({
+        color: "red",
+        title: "Transfer Failed",
+        message: (e as Error).message ?? "The transaction failed for unknown reason",
+      });
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <div>
@@ -37,10 +85,22 @@ export function TransferCkbRequest() {
           <div className="text-sm text-slate-800 font-semibold">{username}</div>
           <div className="leading-none">
             <Tooltip
-              withArrow multiline position="bottom" width={220}
-              label={<span className="break-all">{l1Address?.toCKBAddress() ?? "--"}</span>}
+              withArrow multiline position="bottom-start" width={220}
+              label={(
+                <div>
+                  <div className="mb-0.5 font-semibold">L1 UP-Lock Address</div>
+                  <div className="break-all">{fullL1Address ?? "--"}</div>
+                </div>
+              )}
             >
-              <span className="text-xs text-slate-500">{tuncatedL1Address ?? "--"}</span>
+              <span>
+                {!fullL1Address && (<span className="text-xs text-slate-500">--</span>)}
+                {fullL1Address && (
+                  <CopyTextButton className="text-xs text-slate-500" title="L1 UP-Lock Address" content={fullL1Address}>
+                    {tuncatedL1Address ?? "--"}
+                  </CopyTextButton>
+                )}
+              </span>
             </Tooltip>
           </div>
         </div>
@@ -59,14 +119,17 @@ export function TransferCkbRequest() {
         <NumberInput
           withAsterisk hideControls removeTrailingZeros noClampOnBlur
           label="Transfer Amount" variant="unstyled" size="lg" placeholder="0" precision={4}
-          rightSection="CKB"
+          value={amount} onChange={setAmount}
         />
       </div>
       <div className="mt-3 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
-        <TextInput withAsterisk label="Recipient" variant="unstyled" size="lg" placeholder="CKB Address" />
+        <TextInput
+          withAsterisk label="Recipient" variant="unstyled" size="lg" placeholder="CKB Address"
+          value={address} onChange={(e) => setAddress(e.target.value)}
+        />
       </div>
 
-      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg">
+      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
         Transfer
       </Button>
     </div>

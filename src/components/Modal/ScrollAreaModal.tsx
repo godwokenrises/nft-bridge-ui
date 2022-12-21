@@ -1,7 +1,11 @@
 import { Modal, ModalProps, ScrollArea } from "@mantine/core";
 import classes from "classnames";
 
-export function ScrollAreaModal(props: ModalProps) {
+export interface ScrollAreaModalProps {
+  onClose?: () => void;
+}
+
+export function ScrollAreaModal(props: ScrollAreaModalProps & Omit<ModalProps, "onClose">) {
   return (
     <Modal
       centered
@@ -9,6 +13,7 @@ export function ScrollAreaModal(props: ModalProps) {
       size={props.size ?? 400}
       radius={props.radius ?? "lg"}
       overlayBlur={props.overlayBlur ?? 5}
+      onClose={props.onClose ?? (() => {})}
       classNames={{
         modal: classes("p-0!", props.classNames?.modal),
         body: classes("flex-auto flex", props.classNames?.body),
