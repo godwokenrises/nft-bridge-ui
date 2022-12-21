@@ -1,31 +1,21 @@
-# Create React App
+# Test on UniPass SDKs
 
-This directory is a brief example of a [Create React App](https://github.com/facebook/create-react-app) site that can be deployed to Vercel with zero configuration.
+This project is used to test the functionality of UniPass on CKB L1, and the project is built with Vite3 + Mantine + TailwindCSS + Jotai. 
 
-## Deploy Your Own
+## Status
+Major goals of the project:
+- [x] Test the L1 CKB transfer feature with `up-core` and `up-ckb`
+- [ ] Design the draft look of NFT-Bridge in the project
 
-Deploy your own Create React App project with Vercel.
+Tech tests in the project:
+- [x] TailwindCSS with Vite3
+- [x] Jotai for state management
+- [x] Mantine and modals/forms/notifications
+- [x] Async routes for saving first-screen loading time
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/vercel/tree/main/examples/create-react-app&template=create-react-app)
+## Issues
 
-_Live Example: https://create-react-template.vercel.app/_
+When developing I've found some issues with the project, they might have been resolved:
+- [Node polyfills](./issues/node-polyfills.md)
 
-## Available Scripts
 
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes. You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode. See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.
-
-It correctly bundles React in production mode and optimizes the build for the best performance. The build is minified and the filenames include the hashes.
