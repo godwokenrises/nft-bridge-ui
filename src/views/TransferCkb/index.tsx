@@ -6,11 +6,11 @@ import { AccountBalanceWalletOutlined, LogOutOutlined } from "@ricons/material";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
 import { ConnectUnipassId } from "@/components/Unipass";
 import { CopyTextButton } from "@/components/Button";
-import { useUnipassId } from "@/states/Unipass/useUnipass";
+import { useUnipassId } from "@/modules/Unipass/useUnipass";
 import { truncateCkbAddress } from "@/utils";
 import { Address, AddressType, Amount } from "@lay2/pw-core";
-import { UPCoreSimpleProvider } from "@/states/Unipass/UpCoreSimpleProvider";
-import { UpLockCodeHash } from "@/states/Unipass/UpState";
+import { UPCoreSimpleProvider } from "@/modules/Unipass/UpCoreSimpleProvider";
+import { UpLockCodeHash } from "@/modules/Unipass/UpState";
 import { showNotification } from "@mantine/notifications";
 
 export function TransferCkbPage() {
@@ -37,12 +37,37 @@ export function TransferCkbRequest() {
   const [address, setAddress] = useState<string>("");
   const [sending, setSending] = useState(false);
 
+  function verifyForm() {
+    if (sending) {
+      return false;
+    }
+    if (!username) {
+      showNotification({
+        color: "red",
+        title: "No userinfo",
+        message: "No userinfo to fill in, maybe you need to refresh and login",
+      });
+      return false;
+    }
+    if (!amount) {
+      showNotification({
+        color: "red",
+        title: "Enter transfer amount",
+        message: "Please enter a valid transfer amount",
+      });
+      return false;
+    }
+    if (!address) {
+      showNotification({
+        color: "red",
+        title: "Enter recipient's address",
+        message: "Please enter the recipient's address",
+      });
+      return false;
+    }
+  }
   async function send() {
-    if (sending) return console.log("sending tx");
-    if (!username) return console.log("no userinfo");
-    if (!address) return console.log("no address");
-    if (!amount) return console.log("no amount");
-
+    if (!verifyForm()) return;
     setSending(true);
 
     const toAmount = new Amount(String(amount!));
@@ -57,7 +82,7 @@ export function TransferCkbRequest() {
       showNotification({
         autoClose: false,
         color: "green",
-        title: "Transfer Completed",
+        title: "Transfer completed",
         message: `Click to view the transaction: ${txHash}`,
         onClick: () => window.open(`https://pudge.explorer.nervos.org/transaction/${txHash}`, "_blank"),
       });
@@ -65,7 +90,7 @@ export function TransferCkbRequest() {
       console.error("tx failed:", e);
       showNotification({
         color: "red",
-        title: "Transfer Failed",
+        title: "Transfer failed",
         message: (e as Error).message ?? "The transaction failed for unknown reason",
       });
     } finally {

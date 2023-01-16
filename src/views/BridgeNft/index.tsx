@@ -1,6 +1,6 @@
 import { PageContainer, PageWrapper } from "@/components/Container";
 
-export function NftBridgePage() {
+export function BridgeNftPage() {
   return (
     <PageWrapper>
       <PageContainer className="flex-auto flex flex-col items-center">NFT Bridge</PageContainer>
