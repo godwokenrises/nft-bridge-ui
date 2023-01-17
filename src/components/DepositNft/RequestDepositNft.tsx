@@ -1,19 +1,17 @@
 import { Wallet } from "ethers";
 import { useMemo, useState } from "react";
-import { helpers } from "@ckb-lumos/lumos";
 import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
 import { Empty } from "@/components/Status";
 import { CopyTextButton } from "@/components/Button";
-import { ScrollAreaModal } from "@/components/Modal";
+import { openTransactionResultModal, ScrollAreaModal } from "@/components/Modal";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
 import { generateOmniLockAddress } from "@/modules/OmniLock";
 import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
-import { Nrc721NftData, sendNrc721Nft } from "@/modules/Nrc721";
-import { openTransactionResultModal } from "@/components/Modal";
+import { Nrc721NftData, depositNrc721Nft } from "@/modules/Nrc721";
 import { truncateCkbAddress } from "@/utils";
 
-export function RequestTransferNft() {
+export function RequestDepositNft() {
   const [privateKey, setPrivateKey] = useState<string>("");
   const signer = useMemo(() => {
     try {
@@ -28,7 +26,6 @@ export function RequestTransferNft() {
   }, [privateKey]);
 
   const [sending, setSending] = useState(false);
-  const [toAddress, setToAddress] = useState<string>("");
   const [selectedNfts, setSelectedNfts] = useState<Nrc721NftData[]>([]);
 
   function isNftItemSelected(row: Nrc721NftData, selected: Nrc721NftData[]) {
@@ -55,73 +52,43 @@ export function RequestTransferNft() {
       showNotification({
         color: "red",
         title: "Select target NFT",
-        message: "Please select a target NFT to transfer",
-      });
-      return false;
-    }
-    if (!toAddress) {
-      showNotification({
-        color: "red",
-        title: "Enter recipient's address",
-        message: "Please enter the recipient's address",
-      });
-      return false;
-    }
-    if (toAddress === omniAddress) {
-      showNotification({
-        color: "red",
-        title: "Transferring to yourself",
-        message: "Cannot transfer to the origin address",
-      });
-      return false;
-    }
-
-    try {
-      helpers.parseAddress(toAddress, {
-        config: AppLumosConfig,
-      });
-    } catch {
-      showNotification({
-        color: "red",
-        title: "Invalid recipient's address",
-        message: "Please enter a valid recipient's address",
+        message: "Please select a target NFT to deposit",
       });
       return false;
     }
 
     return true;
   }
-  async function send() {
+  async function deposit() {
     if (!verifyForm()) return;
     setSending(true);
 
     try {
-      const txHash = await sendNrc721Nft({
+      const txHash = await depositNrc721Nft({
         nftData: selectedNfts[0],
+        ethAddress: signer!.address,
         fromAddress: omniAddress!,
-        toAddress: toAddress,
         signer: signer!,
       });
 
-      console.log("transaction sent:", txHash);
+      console.log("sent", txHash);
 
-      setToAddress("");
       setPrivateKey("");
       setSelectedNfts([]);
       openTransactionResultModal({
-        modalId: "RequestTransferNft",
-        title: "Transfer completed",
-        subtitle: "The transaction is sent, you can check the status of the transaction in the explorer",
+        modalId: "RequestDepositNft",
+        title: "Deposit sent",
+        subtitle: "The transaction is sent, please wait for the collector to collect and mint it on L2, or you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
       });
     } catch (e) {
-      console.error("transaction failed: ", e);
+      console.error("sendNrc721Nft", e);
       openTransactionResultModal({
         success: false,
-        modalId: "RequestTransferNft",
-        title: "Transfer failed",
-        subtitle: "Failed to transfer NFT while sending transaction",
+        modalId: "RequestDepositNft",
+        title: "Deposit failed",
+        subtitle: "Failed to deposit NFT while sending transaction",
         error: (e as Error).message ?? "Unknown error, please check the details of the failure in console logs",
       });
     } finally {
@@ -180,26 +147,15 @@ export function RequestTransferNft() {
         </Input.Wrapper>
       </div>
 
-      <div className="py-3.5 flex justify-center">
-        <div className="w-6 h-px bg-slate-300" />
-      </div>
-
-      <div className="px-3 pt-3 pb-1 rounded-xl bg-slate-50">
-        <TextInput
-          withAsterisk label="Recipient" variant="unstyled" size="lg" placeholder="Enter CKB Address"
-          value={toAddress} onChange={(e) => setToAddress(e.target.value)}
-        />
-      </div>
-
-      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
-        Transfer
+      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
+        Deposit
       </Button>
 
       <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
         <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
           <Loader size="xl" color="currentColor" />
         </div>
-        <div className="mt-1 text-center font-semibold text-slate-900">Transferring</div>
+        <div className="mt-1 text-center font-semibold text-slate-900">Depositing</div>
         <div className="mt-0.5 text-xs text-center text-slate-500">Please wait for the transaction to be completed</div>
 
         <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to close the dialog</div>}>

@@ -4,6 +4,7 @@ import { IndexPage } from "./views/Index";
 import { createRoot } from "react-dom/client";
 import { createEmotionCache, MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
+import { ModalsProvider } from "@mantine/modals";
 
 const root = document.getElementById("root") as HTMLElement;
 const emotionCache = createEmotionCache({
@@ -15,7 +16,9 @@ createRoot(root).render(
   <StrictMode>
     <MantineProvider emotionCache={emotionCache}>
       <NotificationsProvider>
-        <IndexPage />
+        <ModalsProvider>
+          <IndexPage />
+        </ModalsProvider>
       </NotificationsProvider>
     </MantineProvider>
   </StrictMode>,

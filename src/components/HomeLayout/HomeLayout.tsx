@@ -42,15 +42,9 @@ export function HomeHeader() {
 export function HeaderTabs() {
   return (
     <div className="h-full">
-      <HeaderTab to="transfer-ckb" pattern="/transfer-ckb/*">
-        Transfer CKB
-      </HeaderTab>
-      <HeaderTab to="transfer-nft" pattern="/transfer-nft/*">
-        Transfer NFT
-      </HeaderTab>
-      <HeaderTab to="bridge-nft" pattern="/bridge-nft/*">
-        Bridge NFT
-      </HeaderTab>
+      <HeaderTab to="transfer-ckb" pattern="/transfer-ckb/*">Transfer CKB</HeaderTab>
+      <HeaderTab to="transfer-nft" pattern="/transfer-nft/*">Transfer NFT</HeaderTab>
+      <HeaderTab to="deposit-nft" pattern="/deposit-nft/*">Deposit NFT</HeaderTab>
     </div>
   );
 }

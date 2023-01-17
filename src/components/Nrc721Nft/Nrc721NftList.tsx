@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
-import { useQuery } from "react-query";
 import { Loader } from "@mantine/core";
+import { useQuery } from "react-query";
 import { Nrc721NftItem } from "@/components/Nrc721Nft";
 import { getSupportedNrc721NftList, Nrc721NftData } from "@/modules/Nrc721";
+
 export interface Nrc721NftListProps {
   address: string;
   disabled?: boolean;

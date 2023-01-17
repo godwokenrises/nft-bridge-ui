@@ -1,58 +1,20 @@
 import { Wallet } from "ethers";
-import { helpers, BI } from "@ckb-lumos/lumos";
-import { Cell, CellDep, Hash, HexString, Transaction } from "@ckb-lumos/base";
-import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
-import { Nrc721Sdk, Nrc721NftData } from "../sdk";
-import { findNrc721ConfigFromNftData } from "./config";
-import { AppLumosConfig, AppNrc721Config } from "@/constants/AppEnvironment";
-import { AppCkbIndexer, AppCkbIndexerUrl, AppCkbRpcUrl } from "@/constants/AppEnvironment";
+import { BI, helpers } from "@ckb-lumos/lumos";
+import { Cell, CellDep, Hash, Transaction } from "@ckb-lumos/base";
+import { findNrc721ConfigFromNftData, Nrc721NftData, Nrc721Sdk } from "@/modules/Nrc721";
 import { minimalOmniLockPureCellCapacity, signOmniLockTransactionSkeleton } from "@/modules/OmniLock";
+import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
 import { collectPaymentCells } from "@/modules/Ckb";
 
-export async function getSupportedNrc721NftList(address: HexString) {
-  const Nrc721Service = await Nrc721Sdk.initialize({
-    indexerUrl: AppCkbIndexerUrl,
-    nodeUrl: AppCkbRpcUrl,
-  });
-
-  const lock = helpers.parseAddress(address, {
-    config: AppLumosConfig,
-  });
-
-  const codeHashes = AppNrc721Config.configs.map((con) => con.nftScriptCodeHash);
-  function collect(nftScriptCodeHash: string) {
-    const collector = AppCkbIndexer.collector({
-      lock,
-      type: {
-        codeHash: nftScriptCodeHash,
-        hashType: "type",
-        args: "0x",
-      },
-    });
-
-    return collector.collect();
-  }
-
-  const cells: Nrc721NftData[] = [];
-  for (const codeHash of codeHashes) {
-    for await (const cell of collect(codeHash)) {
-      const type = cell.cellOutput.type;
-      if (type && await Nrc721Service.nftCell.isCellNRC721(type)) {
-        const data: Nrc721NftData = await Nrc721Service.nftCell.read(type);
-        cells.push(data);
-      }
-    }
-  }
-
-  console.log("nrc721 cells:", cells);
-  return cells;
-}
+import { AppLumosConfig, AppNrc721Config } from "@/constants/AppEnvironment";
+import { AppCkbIndexer, AppCkbIndexerUrl, AppCkbRpcUrl } from "@/constants/AppEnvironment";
 
 export interface SendNrc721NftPayload {
   nftData: Nrc721NftData;
   fromAddress: string;
   toAddress: string;
   signer: Wallet;
+  transformNftCell?: (nftCell: Cell) => Cell;
 }
 
 export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
@@ -61,11 +23,11 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
     nodeUrl: AppCkbRpcUrl,
   });
 
-  const unsignedTx = await generateSendNrc721NftTransaction(payload);
+  const unsignedTx = await generateNrc721NftTransferTransaction(payload);
+  console.log("before signing transaction", unsignedTx);
 
   let signedTx: Transaction;
   try {
-    console.log("signing transaction", unsignedTx);
     signedTx = await signOmniLockTransactionSkeleton(unsignedTx, payload.signer);
   } catch(e) {
     console.error("Sign transaction failed:", e);
@@ -84,7 +46,7 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   return txHash;
 }
 
-export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPayload) {
+export async function generateNrc721NftTransferTransaction(payload: SendNrc721NftPayload) {
   // 1. Build cellDeps: nftCellTypeScript, factoryCellTypeScript, omniLockCellDep
   // 1.1 Get Nrc721Config from the target nft
   const nrc721Config = findNrc721ConfigFromNftData(payload.nftData, AppNrc721Config);
@@ -133,14 +95,23 @@ export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPay
     data: payload.nftData.rawCell.data,
     outPoint: payload.nftData.rawCell.outPoint,
   };
+  const outputNftCell: Cell = transformOutputNftCell(
+    {
+      cellOutput: {
+        ...nftCell.cellOutput,
+        lock: helpers.parseAddress(payload.toAddress, {
+          config: AppLumosConfig,
+        }),
+      },
+      data: nftCell.data,
+    },
+    payload
+  );
 
   // 2.2 List needed capacity
   const minimalFeeCapacity = BI.from(10000);
-  const nftCellNeededCapacity = minimalCellCapacityCompatible(nftCell);
+  const nftCellNeededCapacity = minimalCellCapacityCompatible(outputNftCell);
   const exchangeCellNeededCapacity = minimalOmniLockPureCellCapacity(AppLumosConfig);
-
-  console.log("nftCellNeededCapacity", nftCellNeededCapacity.toString());
-  console.log("exchangeCellNeededCapacity", exchangeCellNeededCapacity.toString());
 
   // 2.3 List needed/collected capacity
   let neededCapacity = BI.from(nftCellNeededCapacity).add(minimalFeeCapacity);
@@ -149,10 +120,14 @@ export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPay
 
   // 2.4 If collected capacity is not exactly matched to needed capacity
   if (!collectedCapacity.eq(neededCapacity)) {
-    // 2.4.1 Update needed capacity, then collect extra capacity
     neededCapacity = neededCapacity.add(exchangeCellNeededCapacity);
+  }
+
+  // 2.5 If collected capacity is not enough
+  if (collectedCapacity.lt(neededCapacity)) {
+    // 2.5.1 Collect payment pure ckb cells
     const payment = await collectPaymentCells({
-      neededCapacity: neededCapacity.sub(nftCellNeededCapacity),
+      neededCapacity: neededCapacity.sub(collectedCapacity),
       address: payload.fromAddress,
       indexer: AppCkbIndexer,
       lumosConfig: AppLumosConfig,
@@ -160,27 +135,20 @@ export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPay
 
     console.log("payment", payment.capacity.toString(), payment.cells);
 
-    // 2.4.2 Update status after collected
+    // 2.5.2 Update status after collected
     if (collectedCapacity.add(payment.capacity).gte(neededCapacity)) {
       collectedCapacity = collectedCapacity.add(payment.capacity);
       collectedCells = payment.cells;
     } else {
-      throw new Error("Insufficient capacity");
+      const failedNeededCapacity = neededCapacity.toString();
+      const failedCollectedCapacity = collectedCapacity.add(payment.capacity).toString();
+      throw new Error(`Insufficient capacity, required ${failedNeededCapacity} but collected ${failedCollectedCapacity}`);
     }
   }
 
   // 3. Build outputs: [outputNftCell, exchangeCell]
   // 3.1 Generate output nftCell
-  const outputNftCell: Cell = {
-    cellOutput: {
-      ...nftCell.cellOutput,
-      capacity: nftCellNeededCapacity.toHexString(),
-      lock: helpers.parseAddress(payload.toAddress, {
-        config: AppLumosConfig,
-      }),
-    },
-    data: nftCell.data,
-  };
+  outputNftCell.cellOutput.capacity = nftCellNeededCapacity.toHexString();
 
   // 3.2 Generate output exchangeCell
   const extraCapacity = collectedCapacity.sub(neededCapacity);
@@ -194,11 +162,6 @@ export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPay
     },
     data: "0x"
   };
-
-  console.log("neededCapacity", neededCapacity.toString());
-  console.log("collectedCapacity", collectedCapacity.toString());
-  console.log("extraCapacity", extraCapacity.toString());
-  console.log("exchangeCapacity", exchangeCapacity.toString());
 
   // 4. Generate transaction
   // 4.1 Generate transaction skeleton
@@ -219,4 +182,8 @@ export async function generateSendNrc721NftTransaction(payload: SendNrc721NftPay
     });
 
   return txSkeleton;
+}
+
+export function transformOutputNftCell(cell: Cell, payload: SendNrc721NftPayload) {
+  return payload.transformNftCell ? payload.transformNftCell(cell) : cell;
 }

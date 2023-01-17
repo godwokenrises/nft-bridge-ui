@@ -7,6 +7,7 @@ export const AppNrc721Config = TestnetNrc721Config;
 
 export const AppCkbRpcUrl = "https://testnet.ckb.dev";
 export const AppCkbIndexerUrl = "https://testnet.ckb.dev/indexer";
+export const AppCkbExplorerUrl = "https://pudge.explorer.nervos.org";
 export const AppCkbIndexer = new Indexer(AppCkbRpcUrl, AppCkbIndexerUrl);
 
 

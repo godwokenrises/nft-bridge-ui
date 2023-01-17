@@ -25,6 +25,7 @@ export const InnerTestNrc721Config = {
 };
 
 export const TestnetNrc721Config = {
+  bridgeAddress: "ckt1qzda0cr08m85hc8jlnfp3zer7xulejywt49kt2rr0vthywaa50xwsqga8ztvrgw8xvp89neaj4qs47ql85khmhqggwf89",
   configs: [
     InnerTestNrc721Config,
   ],

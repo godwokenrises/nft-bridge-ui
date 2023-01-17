@@ -1,6 +1,6 @@
-import { blockchain } from "@ckb-lumos/base";
 import { createObjectCodec, enhancePack } from "@ckb-lumos/codec";
-import { HashTypeCodec } from "@/modules/Nrc721/codec/hashType";
+import { blockchain } from "@ckb-lumos/base";
+import { HashTypeCodec } from "./HashType";
 
 const { Byte32 } = blockchain;
 
@@ -10,6 +10,7 @@ const RawNrc721NftCellArgsCodec = createObjectCodec({
   factoryArgs: Byte32,
   tokenId: Byte32,
 });
+
 export const Nrc721NftCellArgsCodec = enhancePack(
   RawNrc721NftCellArgsCodec,
   () => new Uint8Array(0),

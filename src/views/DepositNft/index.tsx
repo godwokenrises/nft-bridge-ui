@@ -1,8 +1,8 @@
 import { Alert } from "@mantine/core";
-import { RequestTransferNft } from "@/components/TransferNft";
+import { RequestDepositNft } from "@/components/DepositNft";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
 
-export function TransferNftPage() {
+export function DepositNftPage() {
   return (
     <PageWrapper>
       <PageContainer className="flex-auto flex flex-col items-center">
@@ -13,8 +13,8 @@ export function TransferNftPage() {
           </Alert>
         </div>
         <PageCard>
-          <div className="mb-4 text-xl font-semibold">Transfer NFT</div>
-          <RequestTransferNft />
+          <div className="mb-4 text-xl font-semibold">Deposit NFT</div>
+          <RequestDepositNft />
         </PageCard>
       </PageContainer>
     </PageWrapper>
