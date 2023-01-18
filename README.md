@@ -8,6 +8,7 @@ Major goals of the project:
 - [x] Design the draft look of NFT-Bridge in the project
 - [x] Add transfer-nft feature
 - [x] Add deposit-nft feature
+- [ ] Support NFT image display
 - [ ] Support more NFT collections
 
 Tech tests in the project:

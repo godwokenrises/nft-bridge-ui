@@ -10,6 +10,7 @@ import { openTransactionResultModal } from "@/components/Modal";
 import { Nrc721NftData, sendNrc721Nft } from "@/modules/Nrc721";
 import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
 import { useUnipassId } from "@/modules/Unipass";
+import { without } from "lodash";
 
 export function RequestTransferNft() {
   const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
@@ -27,6 +28,12 @@ export function RequestTransferNft() {
       setSelectedNfts(!selected ? [row] : []);
     }
   }
+  function onMissingSelected(list: Nrc721NftData[]) {
+    setSelectedNfts((selected) => {
+      return without(selected, ...list);
+    });
+  }
+
   function verifyForm() {
     if (sending) {
       return false;
@@ -131,6 +138,7 @@ export function RequestTransferNft() {
                 selected={selectedNfts}
                 onClickItem={onClickNftItem}
                 isItemSelected={isNftItemSelected}
+                onMissingSelected={onMissingSelected}
                 empty={(
                   <Empty
                     customSize

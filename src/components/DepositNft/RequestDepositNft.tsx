@@ -9,6 +9,7 @@ import { Empty } from "@/components/Status";
 import { useUnipassId } from "@/modules/Unipass";
 import { depositNrc721Nft, Nrc721NftData } from "@/modules/Nrc721";
 import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";
+import { without } from "lodash";
 
 export function RequestDepositNft() {
   const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
@@ -26,6 +27,12 @@ export function RequestDepositNft() {
       setSelectedNfts(!selected ? [row] : []);
     }
   }
+  function onMissingSelected(list: Nrc721NftData[]) {
+    setSelectedNfts((selected) => {
+      return without(selected, ...list);
+    });
+  }
+
   function verifyForm() {
     if (sending) {
       return false;
@@ -118,6 +125,7 @@ export function RequestDepositNft() {
                 selected={selectedNfts}
                 onClickItem={onClickNftItem}
                 isItemSelected={isNftItemSelected}
+                onMissingSelected={onMissingSelected}
                 empty={(
                   <Empty
                     customSize

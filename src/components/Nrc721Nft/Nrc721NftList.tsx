@@ -1,17 +1,19 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Loader } from "@mantine/core";
 import { useQuery } from "react-query";
 import { Nrc721NftItem } from "@/components/Nrc721Nft";
 import { getSupportedNrc721NftList, Nrc721NftData } from "@/modules/Nrc721";
+import { differenceBy } from "lodash";
 
 export interface Nrc721NftListProps {
   address: string;
   disabled?: boolean;
   max?: number;
+  empty?: ReactNode;
   selected?: Nrc721NftData[];
   onClickItem?: (row: Nrc721NftData, selected: boolean) => any;
   isItemSelected?: (row: Nrc721NftData, selected: Nrc721NftData[]) => boolean;
-  empty?: ReactNode;
+  onMissingSelected?: (list: Nrc721NftData[]) => any;
 }
 
 export function Nrc721NftList(props: Nrc721NftListProps) {
@@ -28,12 +30,22 @@ export function Nrc721NftList(props: Nrc721NftListProps) {
     () => getSupportedNrc721NftList(props.address),
     {
       cacheTime: 0,
+      refetchInterval: 60000,
+      refetchIntervalInBackground: true,
+      refetchOnWindowFocus: false,
     }
   );
 
   const nfts = queryNftList.data;
   const isEmpty = !(nfts?.length ?? 0);
   const loading = queryNftList.isLoading;
+
+  useEffect(() => {
+    if (props.onMissingSelected && !queryNftList.isLoading && selected?.length) {
+      const missing = differenceBy(selected, nfts ?? []);
+      props.onMissingSelected?.(missing);
+    }
+  }, [queryNftList.isLoading, props.onMissingSelected]);
 
   function onClickItem(row: Nrc721NftData) {
     if (!props.disabled && Array.isArray(props.selected) && props.isItemSelected) {
