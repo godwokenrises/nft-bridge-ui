@@ -2,7 +2,7 @@ import { Icon } from "@ricons/utils";
 import { Button, Loader, Tooltip } from "@mantine/core";
 import { AccountBalanceWalletOutlined } from "@ricons/material";
 import { ScrollAreaModal } from "@/components/Modal";
-import { useUnipassId } from "@/modules/Unipass/useUnipass";
+import { useUnipassId } from "@/modules/Unipass/hooks/useUnipass";
 
 export function ConnectUnipassId() {
   const { connecting, connect, disconnect } = useUnipassId();

@@ -1,4 +1,3 @@
-
 export const InnerTestNrc721Config = {
   name: "Inner Testing Nrc721",
   nftScriptCodeHash: "0x9cef3391f34e14155caf019b47fc6e44ea31263ec87d62666ef0590f9defb774",

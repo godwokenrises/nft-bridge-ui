@@ -4,14 +4,13 @@ import { Icon } from "@ricons/utils";
 import { Button, Tooltip, TextInput, NumberInput } from "@mantine/core";
 import { AccountBalanceWalletOutlined, LogOutOutlined } from "@ricons/material";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
+import { Address, AddressType, Amount } from "@lay2/pw-core";
 import { ConnectUnipassId } from "@/components/Unipass";
 import { CopyTextButton } from "@/components/Button";
-import { useUnipassId } from "@/modules/Unipass/useUnipass";
 import { truncateCkbAddress } from "@/utils";
-import { Address, AddressType, Amount } from "@lay2/pw-core";
-import { UPCoreSimpleProvider } from "@/modules/Unipass/UpCoreSimpleProvider";
-import { UpLockCodeHash } from "@/modules/Unipass/UpState";
 import { showNotification } from "@mantine/notifications";
+import { useUnipassId, UPCoreSimpleProvider } from "@/modules/Unipass";
+import { AppUnipassConfig } from "@/constants/AppEnvironment";
 
 export function TransferCkbPage() {
   const { connected } = useUnipassId();
@@ -72,7 +71,7 @@ export function TransferCkbRequest() {
 
     const toAmount = new Amount(String(amount!));
     const toAddress = new Address(address!, AddressType.ckb);
-    const provider = new UPCoreSimpleProvider(username!, UpLockCodeHash);
+    const provider = new UPCoreSimpleProvider(username!, AppUnipassConfig.ckb.upLockCodeHash);
     console.log("transferring:", toAddress, toAmount);
 
     try {
