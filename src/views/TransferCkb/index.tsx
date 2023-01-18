@@ -20,7 +20,7 @@ export function TransferCkbPage() {
         <div className="mb-4 w-full md:w-[500px]">
           <Alert title="Early Accessing" color="orange" radius="lg" className="!border !border-orange-200">
             This feature is in early development, and it only supports NFT Collections in our allow list.
-            If you've found any issue with the feature, please <a className="text-emerald-600 underline" href="https://github.com/ShookLyngs/test-unipass-sdk/issues" target="_blank">open an issue</a> to let us know.
+            If you find any issues with the feature, please <a className="text-emerald-600 underline" href="https://github.com/ShookLyngs/test-unipass-sdk/issues" target="_blank">open an issue</a> to let us know.
           </Alert>
         </div>
         <PageCard>
