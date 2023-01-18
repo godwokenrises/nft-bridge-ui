@@ -1,16 +1,15 @@
 import UpCkb from "up-ckb-alpha-test";
 import { useState } from "react";
-import { Icon } from "@ricons/utils";
-import { Button, Tooltip, TextInput, NumberInput } from "@mantine/core";
-import { AccountBalanceWalletOutlined, LogOutOutlined } from "@ricons/material";
-import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
+import { helpers } from "@ckb-lumos/lumos";
 import { Address, AddressType, Amount } from "@lay2/pw-core";
-import { ConnectUnipassId } from "@/components/Unipass";
-import { CopyTextButton } from "@/components/Button";
-import { truncateCkbAddress } from "@/utils";
+import { Button, TextInput, NumberInput, Loader, Tooltip, Alert } from "@mantine/core";
+import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
+import { ConnectUnipassId, UnipassWalletCard } from "@/components/Unipass";
+import { openTransactionResultModal, ScrollAreaModal } from "@/components/Modal";
 import { showNotification } from "@mantine/notifications";
 import { useUnipassId, UPCoreSimpleProvider } from "@/modules/Unipass";
-import { AppUnipassConfig } from "@/constants/AppEnvironment";
+
+import { AppCkbExplorerUrl, AppLumosConfig, AppUnipassConfig } from "@/constants/AppEnvironment";
 
 export function TransferCkbPage() {
   const { connected } = useUnipassId();
@@ -18,6 +17,12 @@ export function TransferCkbPage() {
   return (
     <PageWrapper>
       <PageContainer className="flex-auto flex flex-col items-center">
+        <div className="mb-4 w-full md:w-[500px]">
+          <Alert title="Early Accessing" color="orange" radius="lg" className="!border !border-orange-200">
+            This feature is in early development, and it only supports NFT Collections in our allow list.
+            If you've found any issue with the feature, please <a className="text-emerald-600 underline" href="https://github.com/ShookLyngs/test-unipass-sdk/issues" target="_blank">open an issue</a> to let us know.
+          </Alert>
+        </div>
         <PageCard>
           <div className="mb-4 text-xl font-semibold">Transfer CKB</div>
           {connected ? <TransferCkbRequest /> : <ConnectUnipassId />}
@@ -28,9 +33,7 @@ export function TransferCkbPage() {
 }
 
 export function TransferCkbRequest() {
-  const { username, l1Address, disconnect } = useUnipassId();
-  const fullL1Address = l1Address ? l1Address?.toCKBAddress() : void 0;
-  const tuncatedL1Address = fullL1Address ? truncateCkbAddress(fullL1Address) : void 0;
+  const { username } = useUnipassId();
 
   const [amount, setAmount] = useState<number | undefined>(void 0);
   const [address, setAddress] = useState<string>("");
@@ -64,6 +67,18 @@ export function TransferCkbRequest() {
       });
       return false;
     }
+    try {
+      helpers.parseAddress(address, {
+        config: AppLumosConfig,
+      });
+    } catch {
+      showNotification({
+        color: "red",
+        title: "Invalid recipient's address",
+        message: "Please enter a valid CKB Address to receive CKB on L1",
+      });
+      return false;
+    }
   }
   async function send() {
     if (!verifyForm()) return;
@@ -76,21 +91,26 @@ export function TransferCkbRequest() {
 
     try {
       const txHash = await UpCkb.sendCKB(toAddress, toAmount, provider);
-      setAmount(void 0);
+
       setAddress("");
-      showNotification({
-        autoClose: false,
-        color: "green",
+      setAmount(void 0);
+      openTransactionResultModal({
+        modalId: "RequestTransferCkb",
         title: "Transfer completed",
-        message: `Click to view the transaction: ${txHash}`,
-        onClick: () => window.open(`https://pudge.explorer.nervos.org/transaction/${txHash}`, "_blank"),
+        subtitle: "The transaction is sent, you can check the status of the transaction in the explorer",
+        explorerUrl: `${AppCkbExplorerUrl}/transaction`,
+        txHash: txHash,
       });
     } catch (e) {
       console.error("tx failed:", e);
-      showNotification({
-        color: "red",
+
+      const message = (e as Error).message ?? (typeof e == "string" && e);
+      openTransactionResultModal({
+        success: false,
+        modalId: "RequestTransferCKB",
         title: "Transfer failed",
-        message: (e as Error).message ?? "The transaction failed for unknown reason",
+        subtitle: "Failed to transfer CKB while signing/sending transaction",
+        error: message ?? "Unknown error, please check the details of the failure in console logs",
       });
     } finally {
       setSending(false);
@@ -99,47 +119,9 @@ export function TransferCkbRequest() {
 
   return (
     <div>
-      <div className="p-3 flex items-center rounded-xl border border-slate-200">
-        <div className="w-10 h-10 flex justify-center items-center text-xl rounded-full text-slate-600 border border-slate-300">
-          <Icon>
-            <AccountBalanceWalletOutlined />
-          </Icon>
-        </div>
-        <div className="ml-2 flex-auto flex flex-col justify-center">
-          <div className="text-sm text-slate-800 font-semibold">{username}</div>
-          <div className="leading-none">
-            <Tooltip
-              withArrow multiline position="bottom-start" width={220}
-              label={(
-                <div>
-                  <div className="mb-0.5 font-semibold">L1 UP-Lock Address</div>
-                  <div className="break-all">{fullL1Address ?? "--"}</div>
-                </div>
-              )}
-            >
-              <span>
-                {!fullL1Address && (<span className="text-xs text-slate-500">--</span>)}
-                {fullL1Address && (
-                  <CopyTextButton className="text-xs text-slate-500" title="L1 UP-Lock Address" content={fullL1Address}>
-                    {tuncatedL1Address ?? "--"}
-                  </CopyTextButton>
-                )}
-              </span>
-            </Tooltip>
-          </div>
-        </div>
-        <div>
-          <Tooltip withArrow label="Disconnect from UniPass">
-            <Button compact variant="light" color="red" size="lg" radius="lg" onClick={disconnect}>
-              <Icon>
-                <LogOutOutlined />
-              </Icon>
-            </Button>
-          </Tooltip>
-        </div>
-      </div>
+      <UnipassWalletCard />
 
-      <div className="mt-8 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
+      <div className="mt-3 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
         <NumberInput
           withAsterisk hideControls removeTrailingZeros noClampOnBlur
           label="Transfer Amount" variant="unstyled" size="lg" placeholder="0" precision={4}
@@ -153,9 +135,21 @@ export function TransferCkbRequest() {
         />
       </div>
 
-      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
+      <Button fullWidth className="mt-8" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
         Transfer
       </Button>
+
+      <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
+        <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
+          <Loader size="xl" color="currentColor" />
+        </div>
+        <div className="mt-1 text-center font-semibold text-slate-900">Transferring</div>
+        <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
+
+        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
+          <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
+        </Tooltip>
+      </ScrollAreaModal>
     </div>
   );
 }

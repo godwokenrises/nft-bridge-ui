@@ -1,31 +1,19 @@
-import { Wallet } from "ethers";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { helpers } from "@ckb-lumos/lumos";
 import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
 import { Empty } from "@/components/Status";
-import { CopyTextButton } from "@/components/Button";
 import { ScrollAreaModal } from "@/components/Modal";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
-import { generateOmniLockAddress } from "@/modules/OmniLock";
-import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
-import { Nrc721NftData, sendNrc721Nft } from "@/modules/Nrc721";
+import { UnipassWalletCard } from "@/components/Unipass";
 import { openTransactionResultModal } from "@/components/Modal";
-import { truncateCkbAddress } from "@/utils";
+import { Nrc721NftData, sendNrc721Nft } from "@/modules/Nrc721";
+import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
+import { useUnipassId } from "@/modules/Unipass";
 
 export function RequestTransferNft() {
-  const [privateKey, setPrivateKey] = useState<string>("");
-  const signer = useMemo(() => {
-    try {
-      return privateKey ? new Wallet(privateKey) : void 0;
-    } catch(e) {
-      console.error("Cannot create Wallet with this private-key");
-      return void 0;
-    }
-  }, [privateKey]);
-  const omniAddress = useMemo(() => {
-    return signer ? generateOmniLockAddress(signer!.address, AppLumosConfig) : void 0;
-  }, [privateKey]);
+  const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
+  const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
 
   const [sending, setSending] = useState(false);
   const [toAddress, setToAddress] = useState<string>("");
@@ -43,19 +31,19 @@ export function RequestTransferNft() {
     if (sending) {
       return false;
     }
-    if (!privateKey) {
+    if (!fromAddress) {
       showNotification({
         color: "red",
-        title: "Enter Private Key",
-        message: "Please enter a valid Private Key",
+        title: "Empty L1 UP-Lock Address",
+        message: "No info of L1 UP-Lock Address, please check again and refresh the page",
       });
       return false;
     }
     if (!selectedNfts.length) {
       showNotification({
         color: "red",
-        title: "Select target NFT",
-        message: "Please select a target NFT to transfer",
+        title: "Select NFT",
+        message: "Please select an NFT to transfer on L1",
       });
       return false;
     }
@@ -67,7 +55,7 @@ export function RequestTransferNft() {
       });
       return false;
     }
-    if (toAddress === omniAddress) {
+    if (toAddress === fromAddress) {
       showNotification({
         color: "red",
         title: "Transferring to yourself",
@@ -84,7 +72,7 @@ export function RequestTransferNft() {
       showNotification({
         color: "red",
         title: "Invalid recipient's address",
-        message: "Please enter a valid recipient's address",
+        message: "Please enter a valid CKB Address to receive the NFT on L1",
       });
       return false;
     }
@@ -98,15 +86,15 @@ export function RequestTransferNft() {
     try {
       const txHash = await sendNrc721Nft({
         nftData: selectedNfts[0],
-        fromAddress: omniAddress!,
+        fromAddress: fromAddress!,
         toAddress: toAddress,
-        signer: signer!,
+        signTransactionSkeleton,
+        sendTransaction,
       });
 
       console.log("transaction sent:", txHash);
 
       setToAddress("");
-      setPrivateKey("");
       setSelectedNfts([]);
       openTransactionResultModal({
         modalId: "RequestTransferNft",
@@ -117,12 +105,13 @@ export function RequestTransferNft() {
       });
     } catch (e) {
       console.error("transaction failed: ", e);
+      const message = (e as Error).message ?? (typeof e == "string" && e);
       openTransactionResultModal({
         success: false,
         modalId: "RequestTransferNft",
         title: "Transfer failed",
-        subtitle: "Failed to transfer NFT while sending transaction",
-        error: (e as Error).message ?? "Unknown error, please check the details of the failure in console logs",
+        subtitle: "Failed to transfer NFT while signing/sending transaction",
+        error: message ?? "Unknown error, please check the details of the failure in console logs",
       });
     } finally {
       setSending(false);
@@ -131,32 +120,14 @@ export function RequestTransferNft() {
 
   return (
     <div>
-      <div className="mt-3 px-3 pt-3 pb-1 rounded-t-xl bg-slate-50">
-        <TextInput
-          withAsterisk label="Private Key" variant="unstyled" size="lg" placeholder="Enter Private Key"
-          value={privateKey || ""} onChange={(e) => setPrivateKey(e.target.value)}
-        />
-      </div>
-      <div className="px-3 py-3 rounded-b-xl bg-slate-100">
-        <div className="text-xs text-slate-700">L1 OmniLock Address</div>
-        <div className="mt-0.5 break-all text-xs text-slate-500">
-          {omniAddress && (
-            <Tooltip withArrow multiline position="bottom-start" width={220} label={omniAddress}>
-              <CopyTextButton  title="L1 OmniLock Address" content={omniAddress}>
-                {truncateCkbAddress(omniAddress)}
-              </CopyTextButton>
-            </Tooltip>
-          )}
-          {!omniAddress && ("--")}
-        </div>
-      </div>
+      <UnipassWalletCard />
 
       <div className="mt-3 px-3 py-3 rounded-xl bg-slate-50">
         <Input.Wrapper withAsterisk label="NRC721 NFT" size="lg">
           <div className="mt-3">
-            {omniAddress && (
+            {fromAddress && (
               <Nrc721NftList
-                address={omniAddress}
+                address={fromAddress}
                 selected={selectedNfts}
                 onClickItem={onClickNftItem}
                 isItemSelected={isNftItemSelected}
@@ -169,7 +140,7 @@ export function RequestTransferNft() {
                 )}
               />
             )}
-            {!omniAddress && (
+            {!fromAddress && (
               <Empty
                 customSize
                 classNames={{ root: "mt-3 mb-1.5", icon: "w-14 h-14 text-4xl" }}
@@ -180,18 +151,14 @@ export function RequestTransferNft() {
         </Input.Wrapper>
       </div>
 
-      <div className="py-3.5 flex justify-center">
-        <div className="w-6 h-px bg-slate-300" />
-      </div>
-
-      <div className="px-3 pt-3 pb-1 rounded-xl bg-slate-50">
+      <div className="mt-3 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
         <TextInput
-          withAsterisk label="Recipient" variant="unstyled" size="lg" placeholder="Enter CKB Address"
+          withAsterisk label="Recipient on L1" variant="unstyled" size="lg" placeholder="Enter CKB Address"
           value={toAddress} onChange={(e) => setToAddress(e.target.value)}
         />
       </div>
 
-      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
+      <Button fullWidth className="mt-8" color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
         Transfer
       </Button>
 
@@ -200,9 +167,9 @@ export function RequestTransferNft() {
           <Loader size="xl" color="currentColor" />
         </div>
         <div className="mt-1 text-center font-semibold text-slate-900">Transferring</div>
-        <div className="mt-0.5 text-xs text-center text-slate-500">Please wait for the transaction to be completed</div>
+        <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
 
-        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to close the dialog</div>}>
+        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
           <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
         </Tooltip>
       </ScrollAreaModal>

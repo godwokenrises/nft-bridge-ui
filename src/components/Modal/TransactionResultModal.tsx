@@ -40,13 +40,13 @@ export function openTransactionResultModal(props: TransactionResultModalProps) {
         )}
         {props.error && (
           <div className="rounded-lg bg-slate-100">
-            <div className="px-2 pt-2 text-xs text-center text-slate-400">Error Message</div>
+            <div className="px-2 py-2 text-xs text-center text-slate-400">Error Message</div>
             <ScrollArea.Autosize
               scrollbarSize={8}
               maxHeight={200}
               classNames={{
                 root: "rounded-lg bg-slate-100",
-                viewport: "px-2 pt-1 pb-2 text-sm text-center text-slate-500",
+                viewport: "px-2 pb-2 text-sm text-center text-slate-500",
               }}
             >
               {props.error}

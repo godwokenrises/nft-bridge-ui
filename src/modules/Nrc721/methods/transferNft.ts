@@ -1,34 +1,35 @@
-import { Wallet } from "ethers";
 import { BI, helpers } from "@ckb-lumos/lumos";
 import { Cell, CellDep, Hash, Transaction } from "@ckb-lumos/base";
-import { findNrc721ConfigFromNftData, Nrc721NftData, Nrc721Sdk } from "@/modules/Nrc721";
-import { minimalOmniLockPureCellCapacity, signOmniLockTransactionSkeleton } from "@/modules/OmniLock";
 import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
+import { findNrc721ConfigFromNftData, Nrc721NftData } from "@/modules/Nrc721";
+import { minimalUnipassLockPureCellCapacity } from "@/modules/Unipass";
 import { collectPaymentCells } from "@/modules/Ckb";
 
-import { AppLumosConfig, AppNrc721Config } from "@/constants/AppEnvironment";
-import { AppCkbIndexer, AppCkbIndexerUrl, AppCkbRpcUrl } from "@/constants/AppEnvironment";
+import { AppLumosConfig, AppNrc721Config, AppUnipassConfig } from "@/constants/AppEnvironment";
+import { AppCkbIndexer } from "@/constants/AppEnvironment";
 
 export interface SendNrc721NftPayload {
   nftData: Nrc721NftData;
   fromAddress: string;
   toAddress: string;
-  signer: Wallet;
   transformNftCell?: (nftCell: Cell) => Cell;
+  signTransactionSkeleton: (txSkeleton: helpers.TransactionSkeletonType) => Promise<Transaction>;
+  sendTransaction(tx: Transaction): Promise<Hash>;
 }
 
 export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
-  const Nrc721Service = await Nrc721Sdk.initialize({
+  /*const Nrc721Service = await Nrc721Sdk.initialize({
     indexerUrl: AppCkbIndexerUrl,
     nodeUrl: AppCkbRpcUrl,
-  });
+  });*/
 
   const unsignedTx = await generateNrc721NftTransferTransaction(payload);
   console.log("before signing transaction", unsignedTx);
 
   let signedTx: Transaction;
   try {
-    signedTx = await signOmniLockTransactionSkeleton(unsignedTx, payload.signer);
+    signedTx = await payload.signTransactionSkeleton(unsignedTx);
+    // signedTx = await signOmniLockTransactionSkeleton(unsignedTx, payload.signer);
   } catch(e) {
     console.error("Sign transaction failed:", e);
     throw e;
@@ -37,7 +38,8 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   let txHash: Hash;
   try {
     console.log("sending transaction", signedTx);
-    txHash = await Nrc721Service.ckb.rpc.sendTransaction(signedTx, "passthrough");
+    txHash = await payload.sendTransaction(signedTx);
+    // txHash = await Nrc721Service.ckb.rpc.sendTransaction(signedTx, "passthrough");
   } catch(e) {
     console.error("Send transaction failed:", e);
     throw e;
@@ -69,20 +71,6 @@ export async function generateNrc721NftTransferTransaction(payload: SendNrc721Nf
     },
     depType: nrc721Config.factoryCellDep.depType as CellDep["depType"],
   };
-  const omniLockCellDep: CellDep = {
-    outPoint: {
-      txHash: AppLumosConfig.SCRIPTS.OMNILOCK.TX_HASH,
-      index: AppLumosConfig.SCRIPTS.OMNILOCK.INDEX,
-    },
-    depType: AppLumosConfig.SCRIPTS.OMNILOCK.DEP_TYPE,
-  };
-  const secp256k1Blake160CellDep: CellDep = {
-    outPoint: {
-      txHash: AppLumosConfig.SCRIPTS.SECP256K1_BLAKE160.TX_HASH,
-      index: AppLumosConfig.SCRIPTS.SECP256K1_BLAKE160.INDEX,
-    },
-    depType: AppLumosConfig.SCRIPTS.SECP256K1_BLAKE160.DEP_TYPE,
-  };
 
   // 2. Collect inputs: [nftCell, pureCkbCells]
   // 2.1 Generate nftCell, then calculate occupied capacity of output nftCell
@@ -111,7 +99,7 @@ export async function generateNrc721NftTransferTransaction(payload: SendNrc721Nf
   // 2.2 List needed capacity
   const minimalFeeCapacity = BI.from(10000);
   const nftCellNeededCapacity = minimalCellCapacityCompatible(outputNftCell);
-  const exchangeCellNeededCapacity = minimalOmniLockPureCellCapacity(AppLumosConfig);
+  const exchangeCellNeededCapacity = minimalUnipassLockPureCellCapacity(AppUnipassConfig);
 
   // 2.3 List needed/collected capacity
   let neededCapacity = BI.from(nftCellNeededCapacity).add(minimalFeeCapacity);
@@ -172,7 +160,7 @@ export async function generateNrc721NftTransferTransaction(payload: SendNrc721Nf
   // 4.1 Fill transaction
   txSkeleton = txSkeleton
     .update("cellDeps", (cellDeps) => {
-      return cellDeps.push(omniLockCellDep, secp256k1Blake160CellDep, nftCellDep, factoryCellDep);
+      return cellDeps.push(nftCellDep, factoryCellDep);
     })
     .update("inputs", (inputs) => {
       return inputs.push(nftCell, ...collectedCells);

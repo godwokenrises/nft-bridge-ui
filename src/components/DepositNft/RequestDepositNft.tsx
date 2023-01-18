@@ -1,31 +1,21 @@
-import { Wallet } from "ethers";
-import { useMemo, useState } from "react";
+import { utils } from "ethers";
+import { useState } from "react";
 import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
-import { Empty } from "@/components/Status";
-import { CopyTextButton } from "@/components/Button";
 import { openTransactionResultModal, ScrollAreaModal } from "@/components/Modal";
+import { UnipassWalletCard } from "@/components/Unipass";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
-import { generateOmniLockAddress } from "@/modules/OmniLock";
-import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
-import { Nrc721NftData, depositNrc721Nft } from "@/modules/Nrc721";
-import { truncateCkbAddress } from "@/utils";
+import { Empty } from "@/components/Status";
+import { useUnipassId } from "@/modules/Unipass";
+import { depositNrc721Nft, Nrc721NftData } from "@/modules/Nrc721";
+import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";
 
 export function RequestDepositNft() {
-  const [privateKey, setPrivateKey] = useState<string>("");
-  const signer = useMemo(() => {
-    try {
-      return privateKey ? new Wallet(privateKey) : void 0;
-    } catch(e) {
-      console.error("Cannot create Wallet with this private-key");
-      return void 0;
-    }
-  }, [privateKey]);
-  const omniAddress = useMemo(() => {
-    return signer ? generateOmniLockAddress(signer!.address, AppLumosConfig) : void 0;
-  }, [privateKey]);
+  const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
+  const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
 
   const [sending, setSending] = useState(false);
+  const [ethAddress, setEthAddress] = useState<string>("");
   const [selectedNfts, setSelectedNfts] = useState<Nrc721NftData[]>([]);
 
   function isNftItemSelected(row: Nrc721NftData, selected: Nrc721NftData[]) {
@@ -40,19 +30,35 @@ export function RequestDepositNft() {
     if (sending) {
       return false;
     }
-    if (!privateKey) {
+    if (!fromAddress) {
       showNotification({
         color: "red",
-        title: "Enter Private Key",
-        message: "Please enter a valid Private Key",
+        title: "Empty L1 UP-Lock Address",
+        message: "No info of L1 UP-Lock Address, please check again and refresh the page",
       });
       return false;
     }
     if (!selectedNfts.length) {
       showNotification({
         color: "red",
-        title: "Select target NFT",
-        message: "Please select a target NFT to deposit",
+        title: "Select NFT",
+        message: "Please select an NFT to deposit to L2",
+      });
+      return false;
+    }
+    if (!ethAddress) {
+      showNotification({
+        color: "red",
+        title: "Empty Recipient's address",
+        message: "Please enter a L2 Wallet Address (Ethereum Address) to receive the NFT on L2",
+      });
+      return false;
+    }
+    if (!utils.isAddress(ethAddress)) {
+      showNotification({
+        color: "red",
+        title: "Invalid Recipient's address",
+        message: "Please enter a valid L2 Wallet Address (Ethereum Address) to receive the NFT on L2",
       });
       return false;
     }
@@ -66,14 +72,15 @@ export function RequestDepositNft() {
     try {
       const txHash = await depositNrc721Nft({
         nftData: selectedNfts[0],
-        ethAddress: signer!.address,
-        fromAddress: omniAddress!,
-        signer: signer!,
+        fromAddress: fromAddress!,
+        ethAddress: ethAddress!,
+        signTransactionSkeleton,
+        sendTransaction,
       });
 
       console.log("sent", txHash);
 
-      setPrivateKey("");
+      setEthAddress("");
       setSelectedNfts([]);
       openTransactionResultModal({
         modalId: "RequestDepositNft",
@@ -83,13 +90,14 @@ export function RequestDepositNft() {
         txHash: txHash,
       });
     } catch (e) {
-      console.error("sendNrc721Nft", e);
+      console.error("sendNrc721Nft", typeof e);
+      const message = (e as Error).message ?? (typeof e == "string" && e);
       openTransactionResultModal({
         success: false,
         modalId: "RequestDepositNft",
         title: "Deposit failed",
-        subtitle: "Failed to deposit NFT while sending transaction",
-        error: (e as Error).message ?? "Unknown error, please check the details of the failure in console logs",
+        subtitle: "Failed to deposit NFT while signing/sending transaction",
+        error: message ?? "Unknown error, please check the details of the failure in console logs",
       });
     } finally {
       setSending(false);
@@ -98,32 +106,15 @@ export function RequestDepositNft() {
 
   return (
     <div>
-      <div className="mt-3 px-3 pt-3 pb-1 rounded-t-xl bg-slate-50">
-        <TextInput
-          withAsterisk label="Private Key" variant="unstyled" size="lg" placeholder="Enter Private Key"
-          value={privateKey || ""} onChange={(e) => setPrivateKey(e.target.value)}
-        />
-      </div>
-      <div className="px-3 py-3 rounded-b-xl bg-slate-100">
-        <div className="text-xs text-slate-700">L1 OmniLock Address</div>
-        <div className="mt-0.5 break-all text-xs text-slate-500">
-          {omniAddress && (
-            <Tooltip withArrow multiline position="bottom-start" width={220} label={omniAddress}>
-              <CopyTextButton  title="L1 OmniLock Address" content={omniAddress}>
-                {truncateCkbAddress(omniAddress)}
-              </CopyTextButton>
-            </Tooltip>
-          )}
-          {!omniAddress && ("--")}
-        </div>
-      </div>
+      <UnipassWalletCard />
 
       <div className="mt-3 px-3 py-3 rounded-xl bg-slate-50">
         <Input.Wrapper withAsterisk label="NRC721 NFT" size="lg">
           <div className="mt-3">
-            {omniAddress && (
+            {fromAddress && !sending && (
               <Nrc721NftList
-                address={omniAddress}
+                disabled={sending}
+                address={fromAddress}
                 selected={selectedNfts}
                 onClickItem={onClickNftItem}
                 isItemSelected={isNftItemSelected}
@@ -136,7 +127,7 @@ export function RequestDepositNft() {
                 )}
               />
             )}
-            {!omniAddress && (
+            {!fromAddress && (
               <Empty
                 customSize
                 classNames={{ root: "mt-3 mb-1.5", icon: "w-14 h-14 text-4xl" }}
@@ -147,7 +138,14 @@ export function RequestDepositNft() {
         </Input.Wrapper>
       </div>
 
-      <Button fullWidth className="mt-5" color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
+      <div className="mt-3 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
+        <TextInput
+          withAsterisk label="Recipient on L2" variant="unstyled" size="lg" placeholder="Enter L2 Wallet Address"
+          value={ethAddress} onChange={(e) => setEthAddress(e.target.value)}
+        />
+      </div>
+
+      <Button fullWidth className="mt-8" color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
         Deposit
       </Button>
 
@@ -156,9 +154,9 @@ export function RequestDepositNft() {
           <Loader size="xl" color="currentColor" />
         </div>
         <div className="mt-1 text-center font-semibold text-slate-900">Depositing</div>
-        <div className="mt-0.5 text-xs text-center text-slate-500">Please wait for the transaction to be completed</div>
+        <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
 
-        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to close the dialog</div>}>
+        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
           <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
         </Tooltip>
       </ScrollAreaModal>

@@ -1,3 +1,4 @@
+import PWCore from "@lay2/pw-core";
 import UpCore from "up-core-test";
 import UpCkb from "up-ckb-alpha-test";
 import { Indexer } from "@ckb-lumos/lumos";
@@ -18,8 +19,8 @@ export const AppCkbExplorerUrl = "https://pudge.explorer.nervos.org";
 // instances
 export const AppCkbIndexer = new Indexer(AppCkbRpcUrl, AppCkbIndexerUrl);
 
-// initialize Unipass SDK
+// PwCore
+PWCore.setChainId(AppUnipassConfig.ckb.chainID);
+// Unipass SDK
 UpCore.config(AppUnipassConfig.core);
-UpCkb.config(TestnetUnipassConfig.ckb);
-
-
+UpCkb.config(AppUnipassConfig.ckb);
