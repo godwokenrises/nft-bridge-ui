@@ -43,7 +43,9 @@ export function Nrc721NftList(props: Nrc721NftListProps) {
   useEffect(() => {
     if (props.onMissingSelected && !queryNftList.isLoading && selected?.length) {
       const missing = differenceBy(selected, nfts ?? []);
-      props.onMissingSelected?.(missing);
+      if (missing.length) {
+        props.onMissingSelected(missing);
+      }
     }
   }, [queryNftList.isLoading, props.onMissingSelected]);
 
