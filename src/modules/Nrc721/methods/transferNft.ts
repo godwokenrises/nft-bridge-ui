@@ -3,7 +3,7 @@ import { Cell, CellDep, Hash, Transaction } from "@ckb-lumos/base";
 import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
 import { findNrc721ConfigFromNftData, Nrc721NftData } from "@/modules/Nrc721";
 import { minimalUnipassLockPureCellCapacity } from "@/modules/Unipass";
-import { collectPaymentCells } from "@/modules/Ckb";
+import { collectPaymentCells, getTypeIdCellByTypeScript } from "@/modules/Ckb";
 
 import { AppLumosConfig, AppNrc721Config, AppUnipassConfig } from "@/constants/AppEnvironment";
 import { AppCkbIndexer } from "@/constants/AppEnvironment";
@@ -56,20 +56,11 @@ export async function generateNrc721NftTransferTransaction(payload: SendNrc721Nf
     throw new Error("Nrc721Config not found");
   }
 
-  // 1.2 Get CellDep list
+  // 1.2 Get CellDeps
+  const nftScriptCell = await getTypeIdCellByTypeScript(nrc721Config.nftTypeScript, AppCkbIndexer);
   const nftCellDep: CellDep = {
-    outPoint: {
-      txHash: nrc721Config.nftCellDep.txHash,
-      index: nrc721Config.nftCellDep.index,
-    },
-    depType: nrc721Config.nftCellDep.depType as CellDep["depType"],
-  };
-  const factoryCellDep: CellDep = {
-    outPoint: {
-      txHash: nrc721Config.factoryCellDep.txHash,
-      index: nrc721Config.factoryCellDep.index,
-    },
-    depType: nrc721Config.factoryCellDep.depType as CellDep["depType"],
+    outPoint: nftScriptCell.outPoint!,
+    depType: "code",
   };
 
   // 2. Collect inputs: [nftCell, pureCkbCells]
@@ -160,7 +151,7 @@ export async function generateNrc721NftTransferTransaction(payload: SendNrc721Nf
   // 4.1 Fill transaction
   txSkeleton = txSkeleton
     .update("cellDeps", (cellDeps) => {
-      return cellDeps.push(nftCellDep, factoryCellDep);
+      return cellDeps.push(nftCellDep);
     })
     .update("inputs", (inputs) => {
       return inputs.push(nftCell, ...collectedCells);

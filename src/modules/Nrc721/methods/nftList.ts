@@ -15,7 +15,7 @@ export async function getSupportedNrc721NftList(address: HexString) {
     config: AppLumosConfig,
   });
 
-  const codeHashes = AppNrc721Config.configs.map((con) => con.nftScriptCodeHash);
+  const codeHashes = AppNrc721Config.nftScriptHashes;
   function collect(nftScriptCodeHash: string) {
     const collector = AppCkbIndexer.collector({
       lock,
