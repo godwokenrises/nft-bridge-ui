@@ -170,17 +170,19 @@ export function RequestTransferNft() {
         Transfer
       </Button>
 
-      <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
-        <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
-          <Loader size="xl" color="currentColor" />
-        </div>
-        <div className="mt-1 text-center font-semibold text-slate-900">Transferring</div>
-        <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
+      {sending && (
+        <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
+          <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
+            <Loader size="xl" color="currentColor" />
+          </div>
+          <div className="mt-1 text-center font-semibold text-slate-900">Transferring</div>
+          <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
 
-        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
-          <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
-        </Tooltip>
-      </ScrollAreaModal>
+          <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
+            <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
+          </Tooltip>
+        </ScrollAreaModal>
+      )}
     </div>
   );
 }

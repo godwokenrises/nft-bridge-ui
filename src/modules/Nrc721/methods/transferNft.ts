@@ -18,18 +18,12 @@ export interface SendNrc721NftPayload {
 }
 
 export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
-  /*const Nrc721Service = await Nrc721Sdk.initialize({
-    indexerUrl: AppCkbIndexerUrl,
-    nodeUrl: AppCkbRpcUrl,
-  });*/
-
   const unsignedTx = await generateNrc721NftTransferTransaction(payload);
   console.log("before signing transaction", unsignedTx);
 
   let signedTx: Transaction;
   try {
     signedTx = await payload.signTransactionSkeleton(unsignedTx);
-    // signedTx = await signOmniLockTransactionSkeleton(unsignedTx, payload.signer);
   } catch(e) {
     console.error("Sign transaction failed:", e);
     throw e;
@@ -39,7 +33,6 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   try {
     console.log("sending transaction", signedTx);
     txHash = await payload.sendTransaction(signedTx);
-    // txHash = await Nrc721Service.ckb.rpc.sendTransaction(signedTx, "passthrough");
   } catch(e) {
     console.error("Send transaction failed:", e);
     throw e;
@@ -48,7 +41,7 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   return txHash;
 }
 
-export async function generateNrc721NftTransferTransaction(payload: SendNrc721NftPayload) {
+export async function generateNrc721NftTransferTransaction(payload: SendNrc721NftPayload): Promise<helpers.TransactionSkeletonType> {
   // 1. Build cellDeps: nftCellTypeScript, factoryCellTypeScript, omniLockCellDep
   // 1.1 Get Nrc721NftScriptConfig from nftData
   const nftScriptConfig = findNrc721NftScriptConfigFromNftData(payload.nftData, AppNrc721Config);
