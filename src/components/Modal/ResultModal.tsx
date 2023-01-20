@@ -5,7 +5,7 @@ import { CheckRound, CloseRound } from "@ricons/material";
 import { closeModal, openModal } from "@mantine/modals";
 import classes from "classnames";
 
-export interface SuccessModalProps {
+export interface ResultModalProps {
   success?: boolean;
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -14,9 +14,10 @@ export interface SuccessModalProps {
   showClose?: boolean;
   close?: ReactNode;
   onClickClose?: () => any;
+  onClose?: () => any;
 }
 
-export function ResultModal(props: SuccessModalProps) {
+export function ResultModal(props: ResultModalProps) {
   const showClose = props.showClose ?? true;
   const success = props.success ?? true;
 
@@ -62,7 +63,7 @@ export function ResultModal(props: SuccessModalProps) {
   );
 }
 
-export interface DynamicResultModalProps extends SuccessModalProps {
+export interface DynamicResultModalProps extends ResultModalProps {
   modalId: string;
 }
 
@@ -73,6 +74,7 @@ export function openResultModal(props: DynamicResultModalProps) {
     centered: true,
     radius: "lg",
     overlayBlur: 5,
+    onClose: props.onClose,
     children: (
       <ResultModal
         {...props}

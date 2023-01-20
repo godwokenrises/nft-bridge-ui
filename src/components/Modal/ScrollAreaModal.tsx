@@ -6,6 +6,7 @@ export interface ScrollAreaModalProps {
 }
 
 export function ScrollAreaModal(props: ScrollAreaModalProps & Omit<ModalProps, "onClose">) {
+  console.log("ScrollAreaModal", props.opened);
   return (
     <Modal
       centered

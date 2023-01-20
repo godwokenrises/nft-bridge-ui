@@ -1,7 +1,7 @@
 import { BI, helpers } from "@ckb-lumos/lumos";
 import { Cell, CellDep, Hash, Transaction } from "@ckb-lumos/base";
 import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
-import { findNrc721ConfigFromNftData, Nrc721NftData } from "@/modules/Nrc721";
+import { findNrc721NftScriptConfigFromNftData, Nrc721NftData } from "@/modules/Nrc721";
 import { minimalUnipassLockPureCellCapacity } from "@/modules/Unipass";
 import { collectPaymentCells, getTypeIdCellByTypeScript } from "@/modules/Ckb";
 
@@ -50,14 +50,12 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
 
 export async function generateNrc721NftTransferTransaction(payload: SendNrc721NftPayload) {
   // 1. Build cellDeps: nftCellTypeScript, factoryCellTypeScript, omniLockCellDep
-  // 1.1 Get Nrc721Config from the target nft
-  const nrc721Config = findNrc721ConfigFromNftData(payload.nftData, AppNrc721Config);
-  if (!nrc721Config) {
-    throw new Error("Nrc721Config not found");
-  }
+  // 1.1 Get Nrc721NftScriptConfig from nftData
+  const nftScriptConfig = findNrc721NftScriptConfigFromNftData(payload.nftData, AppNrc721Config);
+  if (!nftScriptConfig) throw new Error("Nrc721NftScriptConfig not found");
 
   // 1.2 Get CellDeps
-  const nftScriptCell = await getTypeIdCellByTypeScript(nrc721Config.nftTypeScript, AppCkbIndexer);
+  const nftScriptCell = await getTypeIdCellByTypeScript(nftScriptConfig.typeScript, AppCkbIndexer);
   const nftCellDep: CellDep = {
     outPoint: nftScriptCell.outPoint!,
     depType: "code",

@@ -95,9 +95,10 @@ export function RequestDepositNft() {
         subtitle: "The transaction is sent, please wait for the collector to collect and mint it on L2, or you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
+        onClose: () => setSending(false),
       });
     } catch (e) {
-      console.error("sendNrc721Nft", typeof e);
+      console.error("sendNrc721Nft", e);
       const message = (e as Error).message ?? (typeof e == "string" && e);
       openTransactionResultModal({
         success: false,
@@ -105,9 +106,8 @@ export function RequestDepositNft() {
         title: "Deposit failed",
         subtitle: "Failed to deposit NFT while signing/sending transaction",
         error: message ?? "Unknown error, please check the details of the failure in console logs",
+        onClose: () => setSending(false),
       });
-    } finally {
-      setSending(false);
     }
   }
 
@@ -157,17 +157,19 @@ export function RequestDepositNft() {
         Deposit
       </Button>
 
-      <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
-        <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
-          <Loader size="xl" color="currentColor" />
-        </div>
-        <div className="mt-1 text-center font-semibold text-slate-900">Depositing</div>
-        <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
+      {sending && (
+        <ScrollAreaModal size={300} withCloseButton={false} opened={sending}>
+          <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
+            <Loader size="xl" color="currentColor" />
+          </div>
+          <div className="mt-1 text-center font-semibold text-slate-900">Depositing</div>
+          <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
 
-        <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
-          <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
-        </Tooltip>
-      </ScrollAreaModal>
+          <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>
+            <Button fullWidth radius="md" variant="default" className="mt-6" onClick={() => setSending(false)}>Cancel</Button>
+          </Tooltip>
+        </ScrollAreaModal>
+      )}
     </div>
   );
 }

@@ -15,7 +15,7 @@ export async function getSupportedNrc721NftList(address: HexString) {
     config: AppLumosConfig,
   });
 
-  const codeHashes = AppNrc721Config.nftScriptHashes;
+  const nftScripts = AppNrc721Config.nftScripts;
   function collect(nftScriptCodeHash: string) {
     const collector = AppCkbIndexer.collector({
       lock,
@@ -30,8 +30,8 @@ export async function getSupportedNrc721NftList(address: HexString) {
   }
 
   const cells: Nrc721NftData[] = [];
-  for (const codeHash of codeHashes) {
-    for await (const cell of collect(codeHash)) {
+  for (const scriptConfig of nftScripts) {
+    for await (const cell of collect(scriptConfig.typeScriptHash)) {
       const type = cell.cellOutput.type;
       if (type && await Nrc721Service.nftCell.isCellNRC721(type)) {
         const data: Nrc721NftData = await Nrc721Service.nftCell.read(type);

@@ -109,6 +109,7 @@ export function RequestTransferNft() {
         subtitle: "The transaction is sent, you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
+        onClose: () => setSending(false),
       });
     } catch (e) {
       console.error("transaction failed: ", e);
@@ -119,9 +120,8 @@ export function RequestTransferNft() {
         title: "Transfer failed",
         subtitle: "Failed to transfer NFT while signing/sending transaction",
         error: message ?? "Unknown error, please check the details of the failure in console logs",
+        onClose: () => setSending(false),
       });
-    } finally {
-      setSending(false);
     }
   }
 

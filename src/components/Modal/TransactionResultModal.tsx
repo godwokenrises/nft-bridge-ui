@@ -13,6 +13,7 @@ export interface TransactionResultModalProps {
   subtitle?: ReactNode;
   explorerUrl?: string;
   showOpenInExplorer?: boolean;
+  onClose?: () => any;
 }
 
 export function openTransactionResultModal(props: TransactionResultModalProps) {
@@ -28,6 +29,7 @@ export function openTransactionResultModal(props: TransactionResultModalProps) {
     modalId: props.modalId,
     title: props.title,
     subtitle: props.subtitle,
+    onClose: props.onClose,
     children: (
       <div className="mt-3">
         {props.txHash && (
