@@ -13,7 +13,7 @@ import { useUnipassId } from "@/modules/Unipass";
 import { without } from "lodash";
 
 export function RequestTransferNft() {
-  const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
+  const { l1Address, signTransactionSkeleton } = useUnipassId();
   const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
 
   const [sending, setSending] = useState(false);
@@ -96,7 +96,6 @@ export function RequestTransferNft() {
         fromAddress: fromAddress!,
         toAddress: toAddress,
         signTransactionSkeleton,
-        sendTransaction,
       });
 
       console.log("transaction sent:", txHash);

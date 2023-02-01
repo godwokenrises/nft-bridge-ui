@@ -12,7 +12,7 @@ import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";
 import { without } from "lodash";
 
 export function RequestDepositNft() {
-  const { l1Address, signTransactionSkeleton, sendTransaction } = useUnipassId();
+  const { l1Address, signTransactionSkeleton } = useUnipassId();
   const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
 
   const [sending, setSending] = useState(false);
@@ -82,7 +82,6 @@ export function RequestDepositNft() {
         fromAddress: fromAddress!,
         ethAddress: ethAddress!,
         signTransactionSkeleton,
-        sendTransaction,
       });
 
       console.log("sent", txHash);

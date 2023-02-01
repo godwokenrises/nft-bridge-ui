@@ -1,10 +1,11 @@
 import { isEqual } from "lodash";
 import { bytes } from "@ckb-lumos/codec";
 import { HashType, Script } from "@ckb-lumos/base";
-import { Nrc721Config, Nrc721NftData, Nrc721NftScriptConfig } from "@/modules/Nrc721";
-import { Nrc721NftCellArgsCodec } from "@/modules/Nrc721/codec";
+import { Nrc721Config, Nrc721FactoryConfig, Nrc721NftScriptConfig } from "../config";
+import { Nrc721NftData } from "../sdk";
+import { Nrc721NftCellArgsCodec } from "../codec";
 
-export function findNrc721ConfigFromNftData(nft: Nrc721NftData, config: Nrc721Config) {
+export function findNrc721FactoryConfigByNftData(nft: Nrc721NftData, config: Nrc721Config): Nrc721FactoryConfig | undefined {
   const nftType = nft.rawCell.type!;
   const nftArgs = Nrc721NftCellArgsCodec.unpack(bytes.bytify(nftType.args));
   const factoryScript: Script = {
@@ -18,7 +19,7 @@ export function findNrc721ConfigFromNftData(nft: Nrc721NftData, config: Nrc721Co
   });
 }
 
-export function findNrc721NftScriptConfigFromNftData(nft: Nrc721NftData, config: Nrc721Config): Nrc721NftScriptConfig | undefined {
+export function findNrc721NftScriptConfigByNftData(nft: Nrc721NftData, config: Nrc721Config): Nrc721NftScriptConfig | undefined {
   const nftType = nft.rawCell.type!;
   return config.nftScripts.find((script => {
     return script.typeScriptHash === nftType.codeHash;

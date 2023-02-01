@@ -1,15 +1,17 @@
 import UpCore from "up-core-test";
 import UpCkb, { AssetLockProof, fetchAssetLockProof, completeTxWithProof } from "up-ckb-alpha-test";
 import * as PwCore from "@lay2/pw-core";
-import * as LumosBase from "@ckb-lumos/base";
 import { useAtom } from "jotai";
 import { useCallback } from "react";
-import { helpers } from "@ckb-lumos/lumos";
 import { useAtomCallback } from "jotai/utils";
-import { UpState } from "./UpState";
+import { helpers } from "@ckb-lumos/lumos";
+import { ResultFormatter } from "@ckb-lumos/rpc";
+import { RPC } from "@ckb-lumos/rpc/lib/types/rpc";
 import { UPCoreSimpleProvider } from "@/modules/Unipass";
+import { lumosTransactionSkeletonToPwRawTransaction } from "@/modules/Transform";
+
+import { UpState } from "./UpState";
 import { AppUnipassConfig } from "@/constants/AppEnvironment";
-import { lumosTransactionSkeletonToPwRawTransaction } from "@/modules/PwLock";
 
 export function useUnipassId() {
   const [username, setUsername] = useAtom(UpState.username);
@@ -96,12 +98,8 @@ export function useUnipassId() {
     console.log("completedSignedTx", completedSignedTx);
     const transformedTx = PwCore.transformers.TransformTransaction(completedSignedTx);
 
-    return transformedTx as LumosBase.Transaction;
-  }
-
-  async function sendTransaction(tx: LumosBase.Transaction): Promise<LumosBase.Hash> {
-    const rpc = new PwCore.RPC(AppUnipassConfig.ckb.ckbNodeUrl);
-    return rpc.send_transaction(tx, "passthrough");
+    // transform snakeCase object to camelCase object
+    return ResultFormatter.toTransaction(transformedTx as RPC.RawTransaction);
   }
 
   return {
@@ -112,6 +110,5 @@ export function useUnipassId() {
     connect,
     disconnect,
     signTransactionSkeleton,
-    sendTransaction,
   };
 }

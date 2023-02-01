@@ -1,2 +1,2 @@
 export * from "./HashType";
-export * from "./Nrc721";
+export * from "./Nrc721NftCell";

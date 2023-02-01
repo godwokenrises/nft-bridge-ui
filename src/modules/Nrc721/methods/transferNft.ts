@@ -1,11 +1,12 @@
-import { BI, helpers } from "@ckb-lumos/lumos";
+import { BI, helpers, RPC } from "@ckb-lumos/lumos";
 import { Cell, CellDep, Hash, Transaction } from "@ckb-lumos/base";
 import { minimalCellCapacityCompatible } from "@ckb-lumos/helpers";
-import { findNrc721NftScriptConfigFromNftData, Nrc721NftData } from "@/modules/Nrc721";
+import { findNrc721NftScriptConfigByNftData, Nrc721NftData } from "@/modules/Nrc721";
 import { minimalUnipassLockPureCellCapacity } from "@/modules/Unipass";
 import { collectPaymentCells, getTypeIdCellByTypeScript } from "@/modules/Ckb";
+import { getTransactionSize, getTransactionSkeletonSize } from "@/modules/Ckb";
 
-import { AppLumosConfig, AppNrc721Config, AppUnipassConfig } from "@/constants/AppEnvironment";
+import { AppCkbRpcUrl, AppLumosConfig, AppNrc721Config, AppUnipassConfig } from "@/constants/AppEnvironment";
 import { AppCkbIndexer } from "@/constants/AppEnvironment";
 
 export interface SendNrc721NftPayload {
@@ -14,16 +15,16 @@ export interface SendNrc721NftPayload {
   toAddress: string;
   transformNftCell?: (nftCell: Cell) => Cell;
   signTransactionSkeleton: (txSkeleton: helpers.TransactionSkeletonType) => Promise<Transaction>;
-  sendTransaction(tx: Transaction): Promise<Hash>;
 }
 
 export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   const unsignedTx = await generateNrc721NftTransferTransaction(payload);
-  console.log("before signing transaction", unsignedTx);
+  console.log("size before sign", getTransactionSkeletonSize(unsignedTx));
 
   let signedTx: Transaction;
   try {
     signedTx = await payload.signTransactionSkeleton(unsignedTx);
+    console.log("size after sign", getTransactionSize(signedTx));
   } catch(e) {
     console.error("Sign transaction failed:", e);
     throw e;
@@ -32,7 +33,8 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
   let txHash: Hash;
   try {
     console.log("sending transaction", signedTx);
-    txHash = await payload.sendTransaction(signedTx);
+    const rpc = new RPC(AppCkbRpcUrl);
+    txHash = await rpc.sendTransaction(signedTx);
   } catch(e) {
     console.error("Send transaction failed:", e);
     throw e;
@@ -44,7 +46,7 @@ export async function sendNrc721Nft(payload: SendNrc721NftPayload) {
 export async function generateNrc721NftTransferTransaction(payload: SendNrc721NftPayload): Promise<helpers.TransactionSkeletonType> {
   // 1. Build cellDeps: nftCellTypeScript, factoryCellTypeScript, omniLockCellDep
   // 1.1 Get Nrc721NftScriptConfig from nftData
-  const nftScriptConfig = findNrc721NftScriptConfigFromNftData(payload.nftData, AppNrc721Config);
+  const nftScriptConfig = findNrc721NftScriptConfigByNftData(payload.nftData, AppNrc721Config);
   if (!nftScriptConfig) throw new Error("Nrc721NftScriptConfig not found");
 
   // 1.2 Get CellDeps
