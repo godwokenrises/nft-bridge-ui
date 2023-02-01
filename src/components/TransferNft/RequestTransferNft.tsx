@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { without } from "lodash";
 import { helpers } from "@ckb-lumos/lumos";
 import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
@@ -10,7 +11,6 @@ import { openTransactionResultModal } from "@/components/Modal";
 import { Nrc721NftData, sendNrc721Nft } from "@/modules/Nrc721";
 import { AppCkbExplorerUrl, AppLumosConfig } from "@/constants/AppEnvironment";
 import { useUnipassId } from "@/modules/Unipass";
-import { without } from "lodash";
 
 export function RequestTransferNft() {
   const { l1Address, signTransactionSkeleton } = useUnipassId();

@@ -1,9 +1,9 @@
-import { Button, ModalProps, ScrollArea } from "@mantine/core";
-import { OpenInNewRound } from "@ricons/material";
-import { Icon } from "@ricons/utils";
-import { Nrc721NftItemImage } from "./Nrc721NftItem";
-import { openModal } from "@mantine/modals";
 import { get } from "lodash";
+import { openModal } from "@mantine/modals";
+import { Button, ModalProps, ScrollArea } from "@mantine/core";
+import { Icon } from "@ricons/utils";
+import { OpenInNewRound } from "@ricons/material";
+import { Nrc721NftItemImage } from "./Nrc721NftItem";
 import { Nrc721MetadataBase, Nrc721NftData } from "@/modules/Nrc721";
 
 import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";

@@ -1,13 +1,14 @@
-import { loadNrc721NftMetadata, Nrc721MetadataBase, Nrc721NftData } from "@/modules/Nrc721";
-import { truncateMiddle } from "@/utils";
-import { HTMLProps } from "react";
 import classes from "classnames";
+import { HTMLProps } from "react";
 import { useQuery } from "react-query";
-import { AppNrc721Config } from "@/constants/AppEnvironment";
 import { Loader, Tooltip } from "@mantine/core";
 import { Icon } from "@ricons/utils";
 import { MoreHorizRound } from "@ricons/material";
-import { openNrc721NftDetailsModal } from "@/components/Nrc721Nft/Nrc721NftDetailsModal";
+import { loadNrc721NftMetadata, Nrc721MetadataBase, Nrc721NftData } from "@/modules/Nrc721";
+import { openNrc721NftDetailsModal } from "./Nrc721NftDetailsModal";
+import { truncateMiddle } from "@/utils";
+
+import { AppNrc721Config } from "@/constants/AppEnvironment";
 
 export interface Nrc721NftItemProps {
   data: Nrc721NftData;
