@@ -39,12 +39,12 @@ export function TransferCkbRequest() {
   const [address, setAddress] = useState<string>("");
   const [sending, setSending] = useState(false);
 
-  function verifyForm() {
+  function verifyForm(notify: boolean = false) {
     if (sending) {
       return false;
     }
     if (!username) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "No userinfo",
         message: "No userinfo to fill in, maybe you need to refresh and login",
@@ -52,7 +52,7 @@ export function TransferCkbRequest() {
       return false;
     }
     if (!amount) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Enter transfer amount",
         message: "Please enter a valid transfer amount",
@@ -60,7 +60,7 @@ export function TransferCkbRequest() {
       return false;
     }
     if (!address) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Enter recipient's address",
         message: "Please enter the recipient's address",
@@ -72,16 +72,17 @@ export function TransferCkbRequest() {
         config: AppLumosConfig,
       });
     } catch {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Invalid recipient's address",
         message: "Please enter a valid CKB Address to receive CKB on L1",
       });
       return false;
     }
+    return true;
   }
   async function send() {
-    if (!verifyForm()) return;
+    if (!verifyForm(true)) return;
     setSending(true);
 
     const toAmount = new Amount(String(amount!));
@@ -97,7 +98,7 @@ export function TransferCkbRequest() {
       openTransactionResultModal({
         modalId: "RequestTransferCkb",
         title: "Transfer completed",
-        subtitle: "The transaction is sent, you can check the status of the transaction in the explorer",
+        subtitle: "The transaction is sent, please keep the TxHash so you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
       });

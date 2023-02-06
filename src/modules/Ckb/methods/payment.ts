@@ -1,7 +1,7 @@
+import { isEqual } from "lodash";
 import { Cell } from "@ckb-lumos/base";
 import { Config } from "@ckb-lumos/config-manager";
 import { BI, helpers, Indexer } from "@ckb-lumos/lumos";
-import { isEqual } from "lodash";
 
 export interface CollectPaymentCellsPayload {
   address: string;

@@ -31,7 +31,10 @@ export function openTransactionResultModal(props: TransactionResultModalProps) {
     subtitle: props.subtitle,
     onClose: props.onClose,
     children: (
-      <div className="mt-3">
+      <div>
+        <div className="py-3 flex justify-center">
+          <div className="w-6 h-px bg-slate-300" />
+        </div>
         {props.txHash && (
           <div className="flex flex-col justify-center items-center p-2 rounded-lg bg-slate-100">
             <div className="text-xs text-center text-slate-400">TxHash</div>
@@ -55,10 +58,6 @@ export function openTransactionResultModal(props: TransactionResultModalProps) {
             </ScrollArea.Autosize>
           </div>
         )}
-
-        <div className="pt-3 flex justify-center">
-          <div className="w-6 h-px bg-slate-300" />
-        </div>
       </div>
     ),
     buttons: (

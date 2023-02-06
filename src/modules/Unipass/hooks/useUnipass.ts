@@ -81,11 +81,13 @@ export function useUnipassId() {
     const signer = new PwCore.DefaultSigner(provider);
     const signedTx = await signer.sign(tx);
 
+    console.log("first signed tx", signedTx.witnessArgs[0], signedTx.witnesses[0]);
+
     // Get AssetLockProof from UpCkb
     const usernameHash = provider.usernameHash;
     const assetLockProof: AssetLockProof = await fetchAssetLockProof(usernameHash);
     if (new PwCore.Reader(assetLockProof.lockInfo[0].userInfo).length() === 0) {
-      throw new Error('user not registered');
+      throw new Error('user is not registered');
     }
 
     console.log("assetLockProof.cellDep", [...assetLockProof.cellDeps]);
@@ -99,7 +101,7 @@ export function useUnipassId() {
     const transformedTx = PwCore.transformers.TransformTransaction(completedSignedTx);
 
     // transform snakeCase object to camelCase object
-    return ResultFormatter.toTransaction(transformedTx as RPC.RawTransaction);
+    return ResultFormatter.toTransaction(transformedTx as RPC.Transaction);
   }
 
   return {

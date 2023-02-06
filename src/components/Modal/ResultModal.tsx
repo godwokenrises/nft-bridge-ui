@@ -37,7 +37,7 @@ export function ResultModal(props: ResultModalProps) {
       </div>
 
       {props.title && (
-        <div className="mt-3 text-center font-semibold text-slate-900">
+        <div className="mt-3 text-lg text-center font-semibold text-slate-900">
           {props.title}
         </div>
       )}

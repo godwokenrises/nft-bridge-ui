@@ -20,6 +20,12 @@ export class UPCoreSimpleProvider extends UPCKBBaseProvider {
       ).serializeJson();
     }
 
+    console.log("UPCoreSimpleProvider signing", {
+      keyType,
+      pubkey,
+      sig
+    });
+
     // convert to hex string
     return {
       keyType,

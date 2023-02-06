@@ -1,6 +1,8 @@
 export * from "./config/types";
 export * from "./config/testnet";
 
+export * from "./constants/witness";
+
 export * from "./hooks/UpState";
 export * from "./hooks/useUnipass";
 

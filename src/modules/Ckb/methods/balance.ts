@@ -1,7 +1,7 @@
 import { helpers, BI, Indexer } from "@ckb-lumos/lumos";
 import { Config } from "@ckb-lumos/config-manager";
 
-export async function getL1Balance(address: string, indexer: Indexer, lumosConfig: Config): Promise<BI> {
+export async function getCkbBalance(address: string, indexer: Indexer, lumosConfig: Config): Promise<BI> {
   let balance = BI.from(0);
 
   const pureCkbCollector = indexer.collector({

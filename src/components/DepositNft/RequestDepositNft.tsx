@@ -1,19 +1,29 @@
 import { utils } from "ethers";
-import { useState } from "react";
+import { without } from "lodash";
+import { useMemo, useState } from "react";
 import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
-import { openTransactionResultModal, ScrollAreaModal } from "@/components/Modal";
+import { ScrollAreaModal, openTransactionResultModal } from "@/components/Modal";
+import { CheckoutTransferNft } from "@/components/TransferNft";
 import { UnipassWalletCard } from "@/components/Unipass";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
 import { Empty } from "@/components/Status";
-import { useUnipassId } from "@/modules/Unipass";
-import { depositNrc721Nft, Nrc721NftData } from "@/modules/Nrc721";
-import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";
-import { without } from "lodash";
+import { UpTxAdditionalFee, useUnipassId } from "@/modules/Unipass";
+import { depositNrc721Nft, generateNrc721DepositTransaction, Nrc721NftData } from "@/modules/Nrc721";
+import { useNrc721TransferCheckout } from "@/modules/Nrc721";
+
+import { AppCkbExplorerUrl, AppCkbIndexer, AppLumosConfig } from "@/constants/AppEnvironment";
+import { useCkbBalance } from "@/modules/Ckb";
 
 export function RequestDepositNft() {
   const { l1Address, signTransactionSkeleton } = useUnipassId();
   const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
+
+  const balance = useCkbBalance({
+    address: fromAddress,
+    indexer: AppCkbIndexer,
+    lumosConfig: AppLumosConfig,
+  });
 
   const [sending, setSending] = useState(false);
   const [ethAddress, setEthAddress] = useState<string>("");
@@ -33,12 +43,22 @@ export function RequestDepositNft() {
     });
   }
 
-  function verifyForm() {
+  const isFormValid = useMemo(() => verifyForm(), [fromAddress, ethAddress, selectedNfts]);
+  const checkout = useNrc721TransferCheckout({
+    deps: [isFormValid, fromAddress, ethAddress, JSON.stringify(selectedNfts)],
+    getter: async () => {
+      if (!isFormValid) return void 0;
+      const payload = getTransferPayload();
+      return await generateNrc721DepositTransaction(payload);
+    },
+  });
+
+  function verifyForm(notify: boolean = false) {
     if (sending) {
       return false;
     }
     if (!fromAddress) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Empty L1 UP-Lock Address",
         message: "No info of L1 UP-Lock Address, please check again and refresh the page",
@@ -46,7 +66,7 @@ export function RequestDepositNft() {
       return false;
     }
     if (!selectedNfts.length) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Select NFT",
         message: "Please select an NFT to deposit to L2",
@@ -54,7 +74,7 @@ export function RequestDepositNft() {
       return false;
     }
     if (!ethAddress) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Empty Recipient's address",
         message: "Please enter a L2 Wallet Address (Ethereum Address) to receive the NFT on L2",
@@ -62,7 +82,7 @@ export function RequestDepositNft() {
       return false;
     }
     if (!utils.isAddress(ethAddress)) {
-      showNotification({
+      if (notify) showNotification({
         color: "red",
         title: "Invalid Recipient's address",
         message: "Please enter a valid L2 Wallet Address (Ethereum Address) to receive the NFT on L2",
@@ -72,17 +92,22 @@ export function RequestDepositNft() {
 
     return true;
   }
+  function getTransferPayload() {
+    return {
+      nftData: selectedNfts[0],
+      fromAddress: fromAddress!,
+      ethAddress: ethAddress!,
+      additionalFee: UpTxAdditionalFee,
+      signTransactionSkeleton,
+    };
+  }
   async function deposit() {
-    if (!verifyForm()) return;
+    if (!verifyForm(true)) return;
     setSending(true);
 
     try {
-      const txHash = await depositNrc721Nft({
-        nftData: selectedNfts[0],
-        fromAddress: fromAddress!,
-        ethAddress: ethAddress!,
-        signTransactionSkeleton,
-      });
+      const payload = getTransferPayload();
+      const txHash = await depositNrc721Nft(payload);
 
       console.log("sent", txHash);
 
@@ -91,7 +116,7 @@ export function RequestDepositNft() {
       openTransactionResultModal({
         modalId: "RequestDepositNft",
         title: "Deposit sent",
-        subtitle: "The transaction is sent, please wait for the collector to collect and mint it on L2, or you can check the status of the transaction in the explorer",
+        subtitle: "The transaction is sent, please keep the TxHash and wait for NFT Bridge Collector to bridge the selected NFT(s) on L2, or you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
         onClose: () => setSending(false),
@@ -152,7 +177,18 @@ export function RequestDepositNft() {
         />
       </div>
 
-      <Button fullWidth className="mt-8" color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
+      <div className="py-4 flex justify-center">
+        <div className="w-6 h-px bg-slate-300" />
+      </div>
+
+      <CheckoutTransferNft
+        address={fromAddress}
+        isCheckoutEnabled={isFormValid}
+        selectedNftsLength={selectedNfts.length}
+        checkout={checkout}
+        balance={balance}
+      />
+      <Button fullWidth color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
         Deposit
       </Button>
 

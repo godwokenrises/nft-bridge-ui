@@ -31,13 +31,10 @@ export function Nrc721NftItem(props: Nrc721NftItemProps & Omit<HTMLProps<HTMLDiv
   const metadata = queryMetadata.data;
 
   function openDetailsModal() {
-    if (!metadata) {
-      return;
-    }
     openNrc721NftDetailsModal({
       modalId: `Nrc721NftDetailsModal-${JSON.stringify(props.data.rawCell)}`,
-      data: props.data,
       metadata: metadata,
+      data: props.data,
     });
   }
 
@@ -98,7 +95,7 @@ export function Nrc721NftItemImage(props: Nrc721NftItemImageProps) {
         </div>
       )}
       {!loading && !metadata?.image && (
-        <div className="py-3 h-full flex justify-center items-center text-center text-slate-500">
+        <div className="py-3 h-full flex justify-center items-center text-center text-slate-500 select-none">
           NFT
         </div>
       )}

@@ -22,7 +22,7 @@ export async function fetchNrc721NftMetadata(nft: Nrc721NftData, loader?: Nrc721
     try {
       return await method(nft);
     } catch(e) {
-      console.error("Failed to fetch Nrc721Metadata", e);
+      // console.error("Failed to fetch Nrc721Metadata", e);
     }
   }
 
@@ -43,7 +43,7 @@ export async function formatNrc721Metadata(rawMetadata: unknown, formatter?: Nrc
       const result = method(rawMetadata);
       return result instanceof Promise ? await result : result;
     } catch(e) {
-      console.error("Failed to format Nrc721Metadata", e);
+      // console.error("Failed to format Nrc721Metadata", e);
     }
   }
 
