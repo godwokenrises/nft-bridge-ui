@@ -16,7 +16,7 @@ export function IndexPage() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomeLayout />}>
-            <Route index element={<Navigate to="transfer-ckb" />} />
+            <Route index element={<Navigate to="transfer-nft" />} />
             <Route path="transfer-ckb" element={<TransferCkbPage />} />
             <Route path="transfer-nft" element={<TransferNftPage />} />
             <Route path="bridge-nft" element={<BridgeNftPage />} />

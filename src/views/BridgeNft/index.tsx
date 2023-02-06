@@ -27,10 +27,18 @@ export function BridgeNftPage() {
         </PageCard>
 
         <div className="mt-4 w-full md:w-[500px]">
-          <Alert title="Tutorial for the feature" color="orange" radius="lg" className="!border !border-orange-200">
+          <Alert title="One-way bridging" color="orange" radius="lg" className="!border !border-orange-200">
+            <div className="mb-1 color-slate-800">
+              Note that currently we only support one-way bridging,
+              therefore your NFT(s) can only be bridged from CKB L1 to Godwoken L2, and not from Godwoken L2 to CKb L1.
+            </div>
+          </Alert>
+        </div>
+        <div className="mt-4 w-full md:w-[500px]">
+          <Alert title="Notes for the feature" color="teal" radius="lg" className="!border !border-orange-200">
             <div className="mb-1 color-slate-800">
               <div>
-                Bridge NFT is a feature to help you bridge target NFT(s) to Godwoken L2.
+                Bridge NFT is a feature to bridge your target NFT(s) to Godwoken L2.
                 Here's the tutorial for the feature:
               </div>
             </div>

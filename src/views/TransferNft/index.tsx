@@ -21,7 +21,7 @@ export function TransferNftPage() {
         </PageCard>
 
         <div className="mt-4 w-full md:w-[500px]">
-          <Alert title="Tutorial for the feature" color="orange" radius="lg" className="!border !border-orange-200">
+          <Alert title="Notes for the feature" color="teal" radius="lg" className="!border !border-orange-200">
             <div className="mb-1 color-slate-800">
               <div>
                 Transfer NFT is a feature to help you transfer target NFT(s) to other addresses.

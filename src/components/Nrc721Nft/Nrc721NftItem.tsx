@@ -53,7 +53,7 @@ export function Nrc721NftItem(props: Nrc721NftItemProps & Omit<HTMLProps<HTMLDiv
       </div>
       <div className="p-1">
         <div className="p-1 text-center rounded-md bg-slate-50">
-          <div className="truncate text-sm text-slate-800">{props.data.factoryData.name}</div>
+          <div className="truncate text-sm text-slate-800">{metadata?.name ?? props.data.factoryData.name}</div>
           <div className="truncate text-xs text-slate-600">{shortenTokenId}</div>
         </div>
       </div>
