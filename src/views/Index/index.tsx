@@ -5,7 +5,7 @@ import { Async } from "@/components/Loader";
 
 const TransferCkbPage = () => <Async factory={() => import("../TransferCkb")} prop="TransferCkbPage" />;
 const TransferNftPage = () => <Async factory={() => import("../TransferNft")} prop="TransferNftPage" />;
-const DepositNftPage = () => <Async factory={() => import("../DepositNft")} prop="DepositNftPage" />;
+const BridgeNftPage = () => <Async factory={() => import("../BridgeNft")} prop="BridgeNftPage" />;
 const NotFoundPage = () => <Async factory={() => import("../Status/NotFound")} prop="NotFoundPage" />;
 
 export function IndexPage() {
@@ -19,7 +19,7 @@ export function IndexPage() {
             <Route index element={<Navigate to="transfer-ckb" />} />
             <Route path="transfer-ckb" element={<TransferCkbPage />} />
             <Route path="transfer-nft" element={<TransferNftPage />} />
-            <Route path="deposit-nft" element={<DepositNftPage />} />
+            <Route path="bridge-nft" element={<BridgeNftPage />} />
             <Route path="404" element={<NotFoundPage />} />
           </Route>
 

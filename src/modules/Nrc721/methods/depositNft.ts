@@ -9,7 +9,7 @@ export interface DepositNrc721Payload extends Omit<SendNrc721NftPayload, "toAddr
   ethAddress: HexString;
 }
 
-export function generateNrc721DepositTransaction(payload: DepositNrc721Payload): Promise<Nrc721NftTransferResult> {
+export function generateNrc721BridgeTransaction(payload: DepositNrc721Payload): Promise<Nrc721NftTransferResult> {
   const toAddress = AppNrc721Config.bridgeAddress;
 
   return generateNrc721NftTransferTransaction({
@@ -19,7 +19,7 @@ export function generateNrc721DepositTransaction(payload: DepositNrc721Payload):
   });
 }
 
-export function depositNrc721Nft(payload: DepositNrc721Payload): Promise<Hash> {
+export function bridgeNrc721Nft(payload: DepositNrc721Payload): Promise<Hash> {
   const toAddress = AppNrc721Config.bridgeAddress;
 
   return sendNrc721Nft({

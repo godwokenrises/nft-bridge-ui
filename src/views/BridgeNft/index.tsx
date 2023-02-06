@@ -1,10 +1,10 @@
 import { Alert } from "@mantine/core";
-import { RequestDepositNft } from "@/components/DepositNft";
+import { RequestBridgeNft } from "@/components/BridgeNft";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
 import { useUnipassId } from "@/modules/Unipass";
 import { ConnectUnipassId, UnipassWalletCard } from "@/components/Unipass";
 
-export function DepositNftPage() {
+export function BridgeNftPage() {
   const { connected } = useUnipassId();
 
   return (
@@ -23,7 +23,7 @@ export function DepositNftPage() {
         )}
         <PageCard>
           <div className="mb-4 text-xl font-semibold">Bridge NFT</div>
-          {connected ? <RequestDepositNft /> :  <ConnectUnipassId />}
+          {connected ? <RequestBridgeNft /> :  <ConnectUnipassId />}
         </PageCard>
 
         <div className="mt-4 w-full md:w-[500px]">

@@ -8,13 +8,13 @@ import { CheckoutTransferNft } from "@/components/TransferNft";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
 import { Empty } from "@/components/Status";
 import { UpTxAdditionalFee, useUnipassId } from "@/modules/Unipass";
-import { depositNrc721Nft, generateNrc721DepositTransaction, Nrc721NftData } from "@/modules/Nrc721";
+import { bridgeNrc721Nft, generateNrc721BridgeTransaction, Nrc721NftData } from "@/modules/Nrc721";
 import { useNrc721TransferCheckout } from "@/modules/Nrc721";
 
 import { AppCkbExplorerUrl, AppCkbIndexer, AppLumosConfig } from "@/constants/AppEnvironment";
 import { useCkbBalance } from "@/modules/Ckb";
 
-export function RequestDepositNft() {
+export function RequestBridgeNft() {
   const { l1Address, signTransactionSkeleton } = useUnipassId();
   const fromAddress = l1Address ? l1Address?.toCKBAddress() : void 0;
 
@@ -48,7 +48,7 @@ export function RequestDepositNft() {
     getter: async () => {
       if (!isFormValid) return void 0;
       const payload = getTransferPayload();
-      return await generateNrc721DepositTransaction(payload);
+      return await generateNrc721BridgeTransaction(payload);
     },
   });
 
@@ -106,14 +106,14 @@ export function RequestDepositNft() {
 
     try {
       const payload = getTransferPayload();
-      const txHash = await depositNrc721Nft(payload);
+      const txHash = await bridgeNrc721Nft(payload);
 
       console.log("sent", txHash);
 
       setEthAddress("");
       setSelectedNfts([]);
       openTransactionResultModal({
-        modalId: "RequestDepositNft",
+        modalId: "RequestBridgeNft",
         title: "Bridge transaction sent",
         subtitle: "The transaction is sent, please keep the TxHash and wait for NFT Bridge Collector to bridge the selected NFT(s) on L2, or you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
@@ -125,7 +125,7 @@ export function RequestDepositNft() {
       const message = (e as Error).message ?? (typeof e == "string" && e);
       openTransactionResultModal({
         success: false,
-        modalId: "RequestDepositNft",
+        modalId: "RequestBridgeNft",
         title: "Bridge transaction failed",
         subtitle: "Failed to bridge NFT while signing/sending transaction",
         error: message ?? "Unknown error, please check the details of the failure in console logs",
