@@ -66,12 +66,17 @@ export function HeaderTab(props: PropsWithChildren<HeaderTabProps>) {
     <Link
       to={props.to}
       className={classes(
-        "relative mx-2.5 inline-flex h-full items-center text-sm md:text-md",
+        "relative mx-1 inline-flex h-full items-center text-sm md:text-md",
         isActive ? "text-gray-900" : "text-gray-400",
       )}
     >
-      {props.children}
-      {isActive && <div className="absolute w-10 h-1 bottom-0 left-1/2 transform -translate-x-1/2 bg-green-500" />}
+      <div className={classes(
+        "px-3 py-1.5 rounded-full",
+        isActive ? "text-slate-900 bg-slate-100" : void 0,
+      )}>
+        {props.children}
+      </div>
+      {/*{isActive && <div className="absolute w-10 h-1 bottom-0 left-1/2 transform -translate-x-1/2 bg-green-500" />}*/}
     </Link>
   );
 }

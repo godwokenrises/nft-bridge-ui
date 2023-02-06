@@ -30,14 +30,14 @@ export function UnipassWalletCard() {
               </div>
             )}
           >
-              <span>
-                {!fullL1Address && (<span className="text-xs text-slate-500">--</span>)}
-                {fullL1Address && (
-                  <CopyTextButton className="text-xs text-slate-500" title="L1 UP-Lock Address" content={fullL1Address}>
-                    {tuncatedL1Address ?? "--"}
-                  </CopyTextButton>
-                )}
-              </span>
+            <span>
+              {!fullL1Address && (<span className="text-xs text-slate-500">--</span>)}
+              {fullL1Address && (
+                <CopyTextButton className="text-xs text-slate-500" title="L1 UP-Lock Address" content={fullL1Address}>
+                  {tuncatedL1Address ?? "--"}
+                </CopyTextButton>
+              )}
+            </span>
           </Tooltip>
         </div>
       </div>
