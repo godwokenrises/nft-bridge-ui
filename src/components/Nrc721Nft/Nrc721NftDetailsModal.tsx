@@ -7,6 +7,7 @@ import { Nrc721NftItemImage } from "./Nrc721NftItem";
 import { Nrc721MetadataBase, Nrc721NftData } from "@/modules/Nrc721";
 
 import { AppCkbExplorerUrl } from "@/constants/AppEnvironment";
+import { CopyTextButton } from "@/components/Button";
 
 export interface Nrc721NftDetailsModalProps {
   data: Nrc721NftData;
@@ -31,7 +32,7 @@ export function Nrc721NftDetailsModal(props: Nrc721NftDetailsModalProps) {
     >
       <div className="p-4">
         <div className="flex flex-col md:flex-row">
-          <div className="mx-auto md:mx-0 w-2/3 md:w-1/3">
+          <div className="mx-auto md:mx-0 w-2/3 md:w-2/7">
             <div className="pt-[100%] relative">
               <div className="absolute left-0 top-0 w-full h-full bg-slate-50 rounded-lg">
                 <Nrc721NftItemImage loading={false} metadata={props.metadata} />
@@ -65,7 +66,11 @@ export function Nrc721NftDetailsModal(props: Nrc721NftDetailsModalProps) {
                   </div>
                   <div>
                     <div className="text-xs text-slate-500">Base Token URI</div>
-                    <div className="text-sm leading-tight text-slate-800 break-all">{props.data.factoryData.baseTokenUri || "-"}</div>
+                    <div className="text-sm leading-tight text-slate-800 break-all">
+                      <CopyTextButton title="Base Token URI" content={props.data.factoryData.baseTokenUri}>
+                        {props.data.factoryData.baseTokenUri || "-"}
+                      </CopyTextButton>
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500">Extra Data</div>
@@ -80,11 +85,19 @@ export function Nrc721NftDetailsModal(props: Nrc721NftDetailsModalProps) {
                 <div className="pt-5 pb-4 space-y-3">
                   <div>
                     <div className="text-xs text-slate-500">Token ID</div>
-                    <div className="text-sm leading-tight text-slate-800 break-all">{props.data.tokenId}</div>
+                    <div className="text-sm leading-tight text-slate-800 break-all">
+                      <CopyTextButton title="Token ID" content={props.data.tokenId}>
+                        {props.data.tokenId}
+                      </CopyTextButton>
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500">Token Cell Tx-Hash</div>
-                    <div className="text-sm leading-tight text-slate-800 break-all">{props.data.rawCell.outPoint?.txHash ?? "-"}</div>
+                    <div className="text-sm leading-tight text-slate-800 break-all">
+                      <CopyTextButton title="Token Cell Tx-Hash" content={props.data.rawCell.outPoint?.txHash}>
+                        {props.data.rawCell.outPoint?.txHash ?? "-"}
+                      </CopyTextButton>
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500">Token Cell Index</div>

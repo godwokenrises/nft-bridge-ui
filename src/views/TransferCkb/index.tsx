@@ -17,16 +17,22 @@ export function TransferCkbPage() {
   return (
     <PageWrapper>
       <PageContainer className="flex-auto flex flex-col items-center">
-        <div className="mb-4 w-full md:w-[500px]">
+        {connected && (
+          <div className="mb-4 w-full md:w-[500px]">
+            <UnipassWalletCard />
+          </div>
+        )}
+        <PageCard>
+          <div className="mb-4 text-xl font-semibold">Transfer CKB</div>
+          {connected ? <TransferCkbRequest /> : <ConnectUnipassId />}
+        </PageCard>
+
+        <div className="mt-4 w-full md:w-[500px]">
           <Alert title="Early Accessing" color="orange" radius="lg" className="!border !border-orange-200">
             This feature is in early development, and it only supports NFT Collections in our allow list.
             If you find any issues with the feature, please <a className="text-emerald-600 underline" href="https://github.com/ShookLyngs/test-unipass-sdk/issues" target="_blank">open an issue</a> to let us know.
           </Alert>
         </div>
-        <PageCard>
-          <div className="mb-4 text-xl font-semibold">Transfer CKB</div>
-          {connected ? <TransferCkbRequest /> : <ConnectUnipassId />}
-        </PageCard>
       </PageContainer>
     </PageWrapper>
   );
@@ -120,8 +126,6 @@ export function TransferCkbRequest() {
 
   return (
     <div>
-      <UnipassWalletCard />
-
       <div className="mt-3 px-3 pt-3 pb-1 rounded-xl bg-slate-50">
         <NumberInput
           withAsterisk hideControls removeTrailingZeros noClampOnBlur

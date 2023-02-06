@@ -5,7 +5,6 @@ import { showNotification } from "@mantine/notifications";
 import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
 import { ScrollAreaModal, openTransactionResultModal } from "@/components/Modal";
 import { CheckoutTransferNft } from "@/components/TransferNft";
-import { UnipassWalletCard } from "@/components/Unipass";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
 import { Empty } from "@/components/Status";
 import { UpTxAdditionalFee, useUnipassId } from "@/modules/Unipass";
@@ -69,7 +68,7 @@ export function RequestDepositNft() {
       if (notify) showNotification({
         color: "red",
         title: "Select NFT",
-        message: "Please select an NFT to deposit to L2",
+        message: "Please select an NFT to bridge to L2",
       });
       return false;
     }
@@ -101,7 +100,7 @@ export function RequestDepositNft() {
       signTransactionSkeleton,
     };
   }
-  async function deposit() {
+  async function send() {
     if (!verifyForm(true)) return;
     setSending(true);
 
@@ -115,7 +114,7 @@ export function RequestDepositNft() {
       setSelectedNfts([]);
       openTransactionResultModal({
         modalId: "RequestDepositNft",
-        title: "Deposit sent",
+        title: "Bridge transaction sent",
         subtitle: "The transaction is sent, please keep the TxHash and wait for NFT Bridge Collector to bridge the selected NFT(s) on L2, or you can check the status of the transaction in the explorer",
         explorerUrl: `${AppCkbExplorerUrl}/transaction`,
         txHash: txHash,
@@ -127,8 +126,8 @@ export function RequestDepositNft() {
       openTransactionResultModal({
         success: false,
         modalId: "RequestDepositNft",
-        title: "Deposit failed",
-        subtitle: "Failed to deposit NFT while signing/sending transaction",
+        title: "Bridge transaction failed",
+        subtitle: "Failed to bridge NFT while signing/sending transaction",
         error: message ?? "Unknown error, please check the details of the failure in console logs",
         onClose: () => setSending(false),
       });
@@ -137,8 +136,6 @@ export function RequestDepositNft() {
 
   return (
     <div>
-      <UnipassWalletCard />
-
       <div className="mt-3 px-3 py-3 rounded-xl bg-slate-50">
         <Input.Wrapper withAsterisk label="NRC721 NFT" size="lg">
           <div className="mt-3">
@@ -188,8 +185,8 @@ export function RequestDepositNft() {
         checkout={checkout}
         balance={balance}
       />
-      <Button fullWidth color="teal" size="lg" radius="lg" loading={sending} onClick={deposit}>
-        Deposit
+      <Button fullWidth color="teal" size="lg" radius="lg" loading={sending} onClick={send}>
+        Bridge
       </Button>
 
       {sending && (
@@ -197,7 +194,7 @@ export function RequestDepositNft() {
           <div className="flex mx-auto w-[100px] h-[100px] justify-center items-center rounded-xl text-emerald-600">
             <Loader size="xl" color="currentColor" />
           </div>
-          <div className="mt-1 text-center font-semibold text-slate-900">Depositing</div>
+          <div className="mt-1 text-center font-semibold text-slate-900">Bridging</div>
           <div className="mt-0.5 text-xs text-center text-slate-500">Please confirm transaction in the UniPassID Popup, and then wait for the transaction to be completed</div>
 
           <Tooltip withArrow multiline width={220} position="bottom" label={<div className="text-center">Force to ignore the transaction</div>}>

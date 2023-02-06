@@ -12,7 +12,7 @@ export function UnipassWalletCard() {
   const tuncatedL1Address = fullL1Address ? truncateCkbAddress(fullL1Address) : void 0;
 
   return (
-    <div className="p-3 flex items-center rounded-xl border border-slate-200">
+    <div className="p-3 flex items-center rounded-2xl border border-slate-200 bg-white">
       <div className="w-10 h-10 flex justify-center items-center text-xl rounded-full text-slate-600 border border-slate-300">
         <Icon>
           <AccountBalanceWalletOutlined />

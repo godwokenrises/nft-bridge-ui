@@ -6,7 +6,6 @@ import { Button, Input, Loader, TextInput, Tooltip } from "@mantine/core";
 import { Empty } from "@/components/Status";
 import { ScrollAreaModal } from "@/components/Modal";
 import { Nrc721NftList } from "@/components/Nrc721Nft";
-import { UnipassWalletCard } from "@/components/Unipass";
 import { openTransactionResultModal } from "@/components/Modal";
 import { CheckoutTransferNft } from "@/components/TransferNft";
 import { useNrc721TransferCheckout, Nrc721NftData } from "@/modules/Nrc721";
@@ -152,8 +151,6 @@ export function RequestTransferNft() {
 
   return (
     <div>
-      <UnipassWalletCard />
-
       <div className="mt-3 px-3 py-3 rounded-xl bg-slate-50">
         <Input.Wrapper withAsterisk label="NRC721 NFT" size="lg">
           <div className="mt-3">
