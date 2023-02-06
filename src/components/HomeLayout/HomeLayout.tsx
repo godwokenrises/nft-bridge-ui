@@ -25,10 +25,11 @@ export function HomeHeader() {
   return (
     <header className="md:h-[65px] px-3 md:py-0 flex-none flex justify-center border-b border-grey-300 bg-white">
       <PageContainer className="h-full flex flex-col md:flex-row justify-between items-center">
-        <div className="base-button pt-4 pb-1 md:py-0 h-full inline-flex items-center select-none text-center md:text-left">
+        <div className="base-button pt-4 pb-1 md:py-0 h-full inline-flex items-center select-none">
+          <img src="/favicon.ico" alt="" className="mr-1 pt-0.5 h-1/2" />
           <div>
-            <div className="text-lg font-bold text-emerald-700 leading-none">UNIPASS</div>
-            <div className="mt-0.5 text-xs text-emerald-500 leading-none">SDK Testing Program</div>
+            <div className="text-md font-bold text-emerald-700 leading-none">Godwoken</div>
+            <div className="mt-0.5 text-xs text-emerald-600 leading-none">NFT Bridge (demo)</div>
           </div>
         </div>
         <div className="h-[50px] md:h-full flex-none md:flex-auto flex justify-end">
