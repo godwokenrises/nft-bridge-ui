@@ -1,25 +1,27 @@
-# Test on UniPass SDKs
+# Godwoken NFT Bridge UI
 
-This project is used to test the functionality of UniPass on CKB L1, and the project is built with Vite3 + Mantine + TailwindCSS + Jotai. 
+This is our UI of project `Godwoken NFT Bridge`, it provides these features:
+- Connect to your UniPassID (UniPass V3) account
+- Bridge NFT(s) to Godwoken L2
+- Transfer NFT(s) on CKB L1
+- Transfer CKB on CKB L1
 
-## Status
-Major goals of the project:
-- [x] Test the L1 CKB transfer feature with `up-core` and `up-ckb`
-- [x] Design the draft look of NFT-Bridge in the project
-- [x] Add transfer-nft feature
-- [x] Add deposit-nft feature
-- [ ] Support NFT image display
-- [ ] Support more NFT collections
+## Commands
 
-Tech tests in the project:
-- [x] TailwindCSS with Vite3
-- [x] Jotai for state management
-- [x] Mantine and modals/forms/notifications
-- [x] Async routes for saving first-screen loading time
+To run in development mode:
+```shell
+yarn run dev
+```
+Build for production:
+```shell
+yarn run build
+```
 
 ## Issues
 
-When developing I've found some issues with the project, they might have been resolved:
+If you find any issues with the app, please let us know by opening an issue, and pull requests are more than welcome if you happen to know how to fix them.
+
+Some notes on the resolved issues:
 - [Node polyfills](./issues/node-polyfills.md)
 
 
