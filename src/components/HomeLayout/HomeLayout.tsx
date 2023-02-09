@@ -25,11 +25,14 @@ export function HomeHeader() {
   return (
     <header className="md:h-[65px] px-3 md:py-0 flex-none flex justify-center border-b border-grey-300 bg-white">
       <PageContainer className="h-full flex flex-col md:flex-row justify-between items-center">
-        <div className="base-button pt-4 pb-1 md:py-0 h-full inline-flex items-center select-none">
+        <div className="md:h-[65px] base-button pt-2 pb-1 md:py-0 h-full inline-flex items-center select-none">
           <img src="/favicon.ico" alt="" className="mr-1 pt-0.5 h-1/2" />
           <div>
-            <div className="text-md font-bold text-emerald-700 leading-none">Godwoken</div>
-            <div className="mt-0.5 text-xs text-emerald-600 leading-none">NFT Bridge (demo)</div>
+            <div className="text-md font-bold text-slate-900 leading-none">GODWOKEN</div>
+            <div className="text-xs leading-none">
+              <span className="text-slate-400">NFT BRIDGE</span>
+              <span className="ml-1 text-xs rounded-full text-emerald-500">· beta</span>
+            </div>
           </div>
         </div>
         <div className="h-[50px] md:h-full flex-none md:flex-auto flex justify-end">
@@ -71,12 +74,12 @@ export function HeaderTab(props: PropsWithChildren<HeaderTabProps>) {
       )}
     >
       <div className={classes(
-        "px-3 py-1.5 rounded-full",
-        isActive ? "text-slate-900 bg-slate-100" : void 0,
+        "px-3 py-1.5 rounded-full md:hover:bg-slate-100",
+        isActive ? "text-slate-900" : void 0,
       )}>
         {props.children}
       </div>
-      {/*{isActive && <div className="absolute w-10 h-1 bottom-0 left-1/2 transform -translate-x-1/2 bg-green-500" />}*/}
+      {isActive && <div className="absolute w-10 h-1 bottom-0 left-1/2 transform -translate-x-1/2 bg-green-500" />}
     </Link>
   );
 }
