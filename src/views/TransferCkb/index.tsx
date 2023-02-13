@@ -2,11 +2,11 @@ import UpCkb from "up-ckb-alpha-test";
 import { useState } from "react";
 import { helpers } from "@ckb-lumos/lumos";
 import { Address, AddressType, Amount } from "@lay2/pw-core";
+import { showNotification } from "@mantine/notifications";
 import { Button, TextInput, NumberInput, Loader, Tooltip, Alert } from "@mantine/core";
 import { PageCard, PageContainer, PageWrapper } from "@/components/Container";
-import { ConnectUnipassId, UnipassWalletCard } from "@/components/Unipass";
 import { openTransactionResultModal, ScrollAreaModal } from "@/components/Modal";
-import { showNotification } from "@mantine/notifications";
+import { ConnectUnipassId, UnipassWalletCard } from "@/components/Unipass";
 import { useUnipassId, UPCoreSimpleProvider } from "@/modules/Unipass";
 
 import { AppCkbExplorerUrl, AppLumosConfig, AppUnipassConfig } from "@/constants/AppEnvironment";
@@ -29,8 +29,8 @@ export function TransferCkbPage() {
 
         <div className="mt-4 w-full md:w-[500px]">
           <Alert title="Early Accessing" color="orange" radius="lg" className="!border !border-orange-200">
-            This feature is in early development, and it only supports NFT Collections in our allow list.
-            If you find any issues with the feature, please <a className="text-emerald-600 underline" href="https://github.com/godwokenrises/nft-bridge-ui/issues" target="_blank">open an issue</a> to let us know.
+            The Godwoken NFT Bridge (beta) is still in early development, you may experience issues using the app.
+            If you find any issues, please <a className="text-emerald-600 underline" href="https://github.com/godwokenrises/nft-bridge-ui/issues" target="_blank">open an issue</a> to let us know.
           </Alert>
         </div>
       </PageContainer>
